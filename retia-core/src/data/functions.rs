@@ -185,7 +185,7 @@ pub(crate) fn op_remove_json_path(args: &[DataValue]) -> Result<DataValue> {
 define_op!(OP_JSON_OBJECT, 0, true);
 pub(crate) fn op_json_object(args: &[DataValue]) -> Result<DataValue> {
     ensure!(
-        args.len() % 2 == 0,
+        args.len().is_multiple_of(2),
         "json_object requires an even number of arguments"
     );
     let mut obj = serde_json::Map::with_capacity(args.len() / 2);
@@ -2527,7 +2527,7 @@ pub(crate) fn str2vld(s: &str) -> Result<ValidityTs> {
 define_op!(OP_RAND_UUID_V1, 0, false);
 pub(crate) fn op_rand_uuid_v1(_args: &[DataValue]) -> Result<DataValue> {
     let mut rng = rand::rng();
-    let uuid_ctx = uuid::v1::Context::new(rng.random());
+    let uuid_ctx = uuid::ContextV1::new(rng.random());
     #[cfg(target_arch = "wasm32")]
     let ts = {
         let since_epoch: f64 = Date::now();

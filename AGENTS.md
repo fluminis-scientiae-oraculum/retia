@@ -59,6 +59,19 @@ cargo build -p retia --features storage-rocksdb --release
 
 `storage-tikv` and `storage-sled` were removed from this fork. `storage-tikv` pulled the upstream `tikv-client 0.4 → tonic 0.10 → rustls 0.21` chain (5 cargo-audit advisories); distributed storage is out of scope. `storage-sled` pulled four unmaintained-crate advisories (`adler`, `bincode`, `fxhash`, `instant`) via `sled 0.34.7`, and sled was experimental + lacking time-travel anyway. If you need either, build against upstream CozoDB.
 
+## Clippy discipline
+
+`[workspace.lints]` in the root `Cargo.toml` sets `warnings = "deny"` for rustc and `clippy::all = "deny"`. CI runs `cargo clippy --workspace --lib --bins --tests -- -D warnings` on every PR; merges fail on any warning. A handful of pervasive upstream-cozo idioms are allow-listed at the workspace level (e.g. `missing_docs`, `dead_code`, `clippy::mutable_key_type`, `clippy::get_first`, `clippy::manual_repeat_n`) — tightening that list is fair game for a focused PR.
+
+Local check before pushing:
+
+```bash
+cargo clippy --workspace --lib --bins --tests -- -D warnings
+cargo clippy -p retia --no-default-features --features storage-sqlite --lib --tests -- -D warnings
+```
+
+Benches (`retia-core/benches/*.rs`) require `#![feature(test)]` (nightly-only) and carry `#![allow(clippy::all)]` / `#![allow(unused_imports)]`; they are excluded from CI clippy.
+
 ## Rayon discipline
 
 - Default builds have rayon on (via `graph-algo` → `rayon`). Don't add new unconditional `use rayon::prelude::*;` — gate behind `#[cfg(feature = "rayon")]` plus a sequential fallback.

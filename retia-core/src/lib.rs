@@ -28,9 +28,6 @@
 //!
 #![doc = document_features::document_features!()]
 #![warn(rust_2018_idioms, future_incompatible)]
-#![warn(missing_docs)]
-#![allow(clippy::type_complexity)]
-#![allow(clippy::too_many_arguments)]
 
 use std::collections::BTreeMap;
 use std::path::Path;

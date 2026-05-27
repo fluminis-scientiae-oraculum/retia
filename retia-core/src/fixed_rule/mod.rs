@@ -698,7 +698,7 @@ pub(crate) struct CannotDetermineArity(
 );
 
 #[derive(Clone, Debug)]
-pub(crate) struct FixedRuleHandle {
+pub struct FixedRuleHandle {
     pub(crate) name: Symbol,
 }
 

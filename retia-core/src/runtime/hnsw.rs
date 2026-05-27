@@ -19,7 +19,7 @@ use itertools::Itertools;
 use miette::{bail, miette, Result};
 use ordered_float::OrderedFloat;
 use priority_queue::PriorityQueue;
-use rand::{Rng, RngExt};
+use rand::RngExt;
 use rustc_hash::{FxHashMap, FxHashSet};
 use smartstring::{LazyCompact, SmartString};
 use std::cmp::{max, Reverse};
@@ -1014,7 +1014,7 @@ impl<'a> SessionTx<'a> {
 
 #[cfg(test)]
 mod tests {
-    use rand::{Rng, RngExt};
+    use rand::RngExt;
     use std::collections::BTreeMap;
 
     #[test]

@@ -8,9 +8,41 @@ members = [
     "retia-examples",
 ]
 
-[profile.bench]
-lto = true
-debug = true
+[workspace.lints.rust]
+# Upstream cozo never doc-commented internal pub items; allowed
+# fork-wide rather than papering over with mass-rustdoc churn.
+missing_docs = "allow"
+# Most "never constructed" hits are #[derive(Diagnostic)] error structs
+# that miette instantiates via macro indirection clippy can't see.
+dead_code = "allow"
+# Stable rustc lifetime-syntax churn; the affected signatures are upstream.
+mismatched_lifetime_syntaxes = "allow"
+# Every other rustc warning becomes a hard error.
+warnings = { level = "deny", priority = -1 }
 
-[profile.dev.package."retia-rocks"]
-opt-level = 3
+[workspace.lints.clippy]
+# Sound + intentional patterns in retia's data layer (SmartString /
+# Vec<DataValue> as map keys, etc.).
+mutable_key_type = "allow"
+# Cozo's compiled-query types are intentionally big tuples; collapsing
+# them would obscure the actual shape.
+type_complexity = "allow"
+too_many_arguments = "allow"
+# `iter::repeat(x).take(n)` → `iter::repeat_n(x, n)` is a clippy 1.82+
+# nag that would touch ~30 upstream sites; skip until a focused pass.
+manual_repeat_n = "allow"
+# Pervasive upstream-cozo idioms; high-churn fixes for low value.
+# Track tightening as a follow-up.
+get_first = "allow"
+manual_unwrap_or_default = "allow"
+unnecessary_unwrap = "allow"
+len_zero = "allow"
+collapsible_if = "allow"
+collapsible_match = "allow"
+needless_borrow = "allow"
+useless_conversion = "allow"
+cloned_ref_to_slice_refs = "allow"
+explicit_into_iter_loop = "allow"
+needless_borrows_for_generic_args = "allow"
+# Default clippy group enforced; specific allows above override.
+all = { level = "deny", priority = -1 }

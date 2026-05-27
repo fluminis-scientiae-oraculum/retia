@@ -10,15 +10,29 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
+  lint:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
-    - name: Build
+    - name: Install clippy
+      run: rustup component add clippy
+    - name: Clippy (workspace, lib + bins + tests, -D warnings)
+      run: cargo clippy --workspace --lib --bins --tests -- -D warnings
+    - name: Clippy (rayon-off path, -D warnings)
+      run: cargo clippy -p retia --no-default-features --features storage-sqlite --lib --tests -- -D warnings
+
+  build:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Build (default)
       run: cargo build -p retia --release --verbose
-    - name: Run tests
+    - name: Test (default)
       run: cargo test -p retia --release --verbose
+    - name: Test (rayon-off path)
+      run: cargo test -p retia --no-default-features --features storage-sqlite --verbose

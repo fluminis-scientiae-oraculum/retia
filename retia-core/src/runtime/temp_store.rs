@@ -408,10 +408,7 @@ impl<'a> Iterator for TupleInIterIterator<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let ret = match self.inner.0.get(self.idx) {
             Some(d) => d,
-            None => match self.inner.1.get(self.idx - self.inner.0.len()) {
-                None => return None,
-                Some(d) => d,
-            },
+            None => self.inner.1.get(self.idx - self.inner.0.len())?,
         };
         self.idx += 1;
         Some(ret)

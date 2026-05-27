@@ -35,13 +35,13 @@ use crate::runtime::temp_store::EpochStore;
 use crate::runtime::transact::SessionTx;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub(crate) enum QueryAssertion {
+pub enum QueryAssertion {
     AssertNone(SourceSpan),
     AssertSome(SourceSpan),
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub(crate) enum ReturnMutation {
+pub enum ReturnMutation {
     NotReturning,
     Returning,
 }

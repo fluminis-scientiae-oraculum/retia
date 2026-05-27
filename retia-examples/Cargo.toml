@@ -12,3 +12,6 @@ publish = false
 retia = { version = "0.1.0", path = "../retia-core", default-features = false, features = [
     "rayon",
 ] }
+
+[lints]
+workspace = true

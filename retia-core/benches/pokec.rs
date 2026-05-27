@@ -6,6 +6,8 @@
  * You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #![feature(test)]
+#![allow(clippy::all)]
+#![allow(unused_imports)]
 
 extern crate test;
 

@@ -318,7 +318,7 @@ impl RelationHandle {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-pub(crate) struct InputRelationHandle {
+pub struct InputRelationHandle {
     pub(crate) name: Symbol,
     pub(crate) metadata: StoredRelationMetadata,
     pub(crate) key_bindings: Vec<Symbol>,

@@ -46,3 +46,6 @@ io-uring = ["pkg-config"]
 cxx-build = "1.0.69"
 pkg-config = { version = "0.3.25", optional = true }
 cc = { version = "1.0", features = ["parallel"] }
+
+[lints]
+workspace = true

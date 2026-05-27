@@ -27,7 +27,7 @@ use itertools::Itertools;
 use log::{error, info, warn};
 use miette::miette;
 // use miette::miette;
-use rand::{Rng, RngExt};
+use rand::RngExt;
 use serde_json::json;
 use tokio::net::TcpListener;
 use tokio::task::spawn_blocking;

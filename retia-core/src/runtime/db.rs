@@ -237,7 +237,7 @@ impl NamedRows {
     pub fn into_payload(self, relation: &str, op: &str) -> Payload {
         let cols_str = self.headers.join(", ");
         let query = format!("?[{cols_str}] <- $data :{op} {relation} {{ {cols_str} }}");
-        let data = DataValue::List(self.rows.into_iter().map(|r| DataValue::List(r)).collect());
+        let data = DataValue::List(self.rows.into_iter().map(DataValue::List).collect());
         (query, [("data".to_string(), data)].into())
     }
 }
