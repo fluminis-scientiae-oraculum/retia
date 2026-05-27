@@ -1,20 +1,24 @@
-## Contributing
+## Contributing to retia
 
-Thanks for your interest in contributing to the Cozo project! 
-As Cozo is just getting started, we aim to keep everything simple.
+`retia` is a Rust-only fork of [CozoDB](https://github.com/cozodb/cozo) maintained inside the [fluminis-scientiae-oraculum](https://github.com/fluminis-scientiae-oraculum) project.
 
-Contributions to code or other materials
-should be done via [pull requests](https://github.com/cozodb/cozo/pulls).
-You will be automatically prompted to sign a [Contributor Agreement (CLA)](https://github.com/cozodb/cozo-docs/blob/main/CLA.md).
+### Where to file your contribution
 
-As the project matures, ideally before the end of 2023, we will change the CLA requirement to a DCO requirement: see [here](https://opensource.com/article/18/3/cla-vs-dco-whats-difference)
-if you are not familiar with the difference.
-The reason that we are asking for CLA now is that we want to retain the option to make changes that would become
-very difficult if copyright is distributed among the contributors, for example if we decide (again)
-that a different (FOSS) license would suit the project better. If you are uncomfortable with any form of CLA,
-you can wait until then.
+- **Bug or feature specific to this fork** (Rust-only packaging, dependency upgrades, retia-* naming, build tooling) — open an issue or PR here: <https://github.com/fluminis-scientiae-oraculum/retia/pulls>
+- **Bug in the query engine, CozoScript language, or features inherited from upstream** — please file [upstream](https://github.com/cozodb/cozo/issues) first. Upstream maintains the full multi-language ecosystem and reviews these issues with broader context. We will pull in upstream fixes as they land.
 
-For code contributions other than simple bug fixes, please
-[discuss](https://github.com/cozodb/cozo/discussions) it
-first before opening a pull request,
-otherwise it is unlikely to be accepted.
+### Pull requests
+
+- No CLA is required. By submitting a PR, you certify that your contribution is your original work or that you have the right to contribute it under MPL-2.0 (a [DCO](https://developercertificate.org/)-style attestation).
+- Keep PRs focused. Bug fixes and small improvements can go straight to a PR; for larger changes (new features, refactors), please open an issue first to discuss scope.
+- Every source file inherited from upstream retains its `Copyright 2022/2023, The Cozo Project Authors.` header — do not remove these. New files should carry an MPL-2.0 header for the fluminis-scientiae-oraculum project.
+
+### Building and testing
+
+```bash
+cargo build --workspace
+cargo test --workspace
+cargo clippy --workspace --all-targets
+```
+
+See the [README](README.md) for storage-engine feature flags and the standalone server.

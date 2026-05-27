@@ -1,21 +1,16 @@
 [workspace]
 resolver = "2"
 members = [
-    "cozo-core",
-    "cozorocks",
-    "cozo-bin",
-    "cozo-lib-c",
-    "cozo-lib-java",
-    "cozo-lib-wasm",
-    "cozo-lib-swift",
-    "cozo-lib-python",
-    "cozo-lib-nodejs",
-    "cozo-core-examples",
+    "retia-core",
+    "retia-rocks",
+    "retia-bin",
+    "retia-wasm",
+    "retia-examples",
 ]
 
 [profile.bench]
 lto = true
 debug = true
 
-[profile.dev.package."cozorocks"]
+[profile.dev.package."retia-rocks"]
 opt-level = 3

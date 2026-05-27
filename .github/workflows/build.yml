@@ -19,6 +19,6 @@ jobs:
       with:
         submodules: recursive
     - name: Build
-      run: cargo build -p cozo --release --verbose
+      run: cargo build -p retia --release --verbose
     - name: Run tests
-      run: cargo test -p cozo --release --verbose
+      run: cargo test -p retia --release --verbose

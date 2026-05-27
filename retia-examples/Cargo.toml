@@ -1,0 +1,14 @@
+[package]
+name = "retia-examples"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+description = "Example code for the retia crate"
+authors = ["Ziyang Hu", "Aditya Kresna"]
+repository = "https://github.com/fluminis-scientiae-oraculum/retia"
+publish = false
+
+[dependencies]
+retia = { version = "0.1.0", path = "../retia-core", default-features = false, features = [
+    "rayon",
+] }
