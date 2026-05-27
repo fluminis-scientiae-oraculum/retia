@@ -63,8 +63,6 @@ pub use storage::mem::{new_retia_mem, MemStorage};
 pub use storage::rocks::{new_retia_rocksdb, RocksDbStorage};
 #[cfg(feature = "storage-new-rocksdb")]
 pub use storage::newrocks::{new_retia_newrocksdb, NewRocksDbStorage};
-#[cfg(feature = "storage-sled")]
-pub use storage::sled::{new_retia_sled, SledStorage};
 #[cfg(feature = "storage-sqlite")]
 pub use storage::sqlite::{new_retia_sqlite, SqliteStorage};
 pub use storage::{Storage, StoreTx};
@@ -114,9 +112,6 @@ pub enum DbInstance {
     #[cfg(feature = "storage-new-rocksdb")]
     /// New RocksDB storage
     NewRocksDb(Db<NewRocksDbStorage>),
-    #[cfg(feature = "storage-sled")]
-    /// Sled storage (experimental)
-    Sled(Db<SledStorage>),
 }
 
 impl Default for DbInstance {
@@ -133,7 +128,6 @@ impl DbInstance {
     /// * `sqlite`
     /// * `rocksdb`
     /// * `newrocksdb`
-    /// * `sled`
     ///
     /// assuming all features are enabled during compilation. Otherwise only
     /// some of the engines are available. The `mem` engine is always available.
@@ -151,8 +145,6 @@ impl DbInstance {
             "rocksdb" => Self::RocksDb(new_retia_rocksdb(path)?),
             #[cfg(feature = "storage-new-rocksdb")]
             "newrocksdb" => Self::NewRocksDb(new_retia_newrocksdb(path)?),
-            #[cfg(feature = "storage-sled")]
-            "sled" => Self::Sled(new_retia_sled(path)?),
             k => bail!(
                 "database engine '{}' not supported (maybe not compiled in)",
                 k
@@ -178,8 +170,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.get_fixed_rules(),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.get_fixed_rules(),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.get_fixed_rules(),
         }
     }
     /// Dispatcher method. See [crate::Db::run_script].
@@ -215,8 +205,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.run_script_ast(payload, cur_vld, mutability),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.run_script_ast(payload, cur_vld, mutability),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.run_script_ast(payload, cur_vld, mutability),
         }
     }
     /// Run the RetiaScript passed in. The `params` argument is a map of parameters.
@@ -288,8 +276,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.export_relations(relations),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.export_relations(relations),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.export_relations(relations),
         }
     }
     /// Export relations to JSON-encoded string.
@@ -328,8 +314,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.import_relations(data),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.import_relations(data),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.import_relations(data),
         }
     }
     /// Import a relation, the data is given as a JSON string, and the returned result is converted into a string.
@@ -369,8 +353,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.backup_db(out_file),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.backup_db(out_file),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.backup_db(out_file),
         }
     }
     /// Backup the running database into an Sqlite file, with JSON string return value.
@@ -391,8 +373,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.restore_backup(in_file),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.restore_backup(in_file),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.restore_backup(in_file),
         }
     }
     /// Restore from an Sqlite backup, with JSON string return value.
@@ -417,8 +397,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.import_from_backup(in_file, relations),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.import_from_backup(in_file, relations),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.import_from_backup(in_file, relations),
         }
     }
     /// Import relations from an Sqlite backup, with JSON string return value.
@@ -455,8 +433,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.register_callback(relation, capacity),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.register_callback(relation, capacity),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.register_callback(relation, capacity),
         }
     }
 
@@ -471,8 +447,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.unregister_callback(id),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.unregister_callback(id),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.unregister_callback(id),
         }
     }
     /// Dispatcher method. See [crate::Db::register_fixed_rule].
@@ -488,8 +462,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.register_fixed_rule(name, rule_impl),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.register_fixed_rule(name, rule_impl),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.register_fixed_rule(name, rule_impl),
         }
     }
     /// Dispatcher method. See [crate::Db::unregister_fixed_rule]
@@ -502,8 +474,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.unregister_fixed_rule(name),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.unregister_fixed_rule(name),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.unregister_fixed_rule(name),
         }
     }
 
@@ -522,8 +492,6 @@ impl DbInstance {
             DbInstance::RocksDb(db) => db.run_multi_transaction(write, payloads, results),
             #[cfg(feature = "storage-new-rocksdb")]
             DbInstance::NewRocksDb(db) => db.run_multi_transaction(write, payloads, results),
-            #[cfg(feature = "storage-sled")]
-            DbInstance::Sled(db) => db.run_multi_transaction(write, payloads, results),
         }
     }
     /// A higher-level, blocking wrapper for [crate::Db::run_multi_transaction]. Runs the transaction on a dedicated thread.

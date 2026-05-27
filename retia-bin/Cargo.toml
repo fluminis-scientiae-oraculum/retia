@@ -35,8 +35,6 @@ requests = ["retia/requests"]
 jemalloc = ["retia/jemalloc"]
 ## Enables io-uring option for the RocksDB storage
 io-uring = ["retia/io-uring"]
-## Enables the [Sled](https://github.com/spacejam/sled) backend
-storage-sled = ["retia/storage-sled"]
 ## Use rayon's work-stealing pool for the fixed-rule SSE handler thread; falls back to std::thread when off.
 rayon = ["dep:rayon", "retia/rayon"]
 

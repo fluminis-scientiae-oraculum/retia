@@ -50,7 +50,6 @@ cargo build -p retia --features storage-rocksdb --release
 | `storage-sqlite`          | `sqlite`, `sqlite3-src`          | Sqlite backend; also the backup/restore exchange format.            |
 | `storage-rocksdb`         | `retia-rocks` (vendored C++)     | Highest concurrency + perf. Long compile.                           |
 | `storage-new-rocksdb`     | `rocksdb` (crates.io)            | Lighter RocksDB build via the official bindings.                    |
-| `storage-sled`            | `sled`                           | Experimental. Prefer rocksdb.                                       |
 | `graph-algo`              | `graph`, `rayon`                 | Parallel graph algorithms (PageRank, Dijkstra, etc.).               |
 | `rayon`                   | `rayon`                          | Parallel query evaluation; opt-in standalone for non-algo callers.  |
 | `requests`                | `minreq` (rustls)                | Lets queries fetch remote data inline.                              |
@@ -58,7 +57,7 @@ cargo build -p retia --features storage-rocksdb --release
 | `io-uring`                | retia-rocks's io-uring           | Linux-only RocksDB tuning knob.                                     |
 | `wasm`                    | `uuid/js`, `js-sys`              | WASM polyfills. Pair with `wasm` target.                            |
 
-`storage-tikv` was removed in [Change `<commit-hash>`] to eliminate a transitive rustls-webpki 0.101 / protobuf 2.28 / rand 0.7 chain. Distributed storage is out of scope for this fork; if you need TiKV, use upstream CozoDB.
+`storage-tikv` and `storage-sled` were removed from this fork. `storage-tikv` pulled the upstream `tikv-client 0.4 → tonic 0.10 → rustls 0.21` chain (5 cargo-audit advisories); distributed storage is out of scope. `storage-sled` pulled four unmaintained-crate advisories (`adler`, `bincode`, `fxhash`, `instant`) via `sled 0.34.7`, and sled was experimental + lacking time-travel anyway. If you need either, build against upstream CozoDB.
 
 ## Rayon discipline
 

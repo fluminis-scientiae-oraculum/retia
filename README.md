@@ -134,7 +134,6 @@ See [`retia-wasm/README.md`](./retia-wasm/README.md) for browser usage.
 | `sqlite`   | Yes         | Easy to compile, low resource use, modest concurrency. Also used as the backup/exchange format.   |
 | `rocksdb`  | Yes         | High concurrency and performance. Uses the bundled `retia-rocks` (C++ via cxx). Long compile.     |
 | `newrocksdb` | Yes       | Same RocksDB engine, but via the crates.io `rocksdb` crate. Lighter build.                        |
-| `sled`     | Yes         | Experimental. No time-travel support. Generally prefer RocksDB.                                   |
 
 Enable engines via Cargo features on `retia`:
 
