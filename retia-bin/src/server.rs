@@ -580,7 +580,7 @@ async fn register_rule(
         let rule_senders = st.rule_senders.clone();
         let rule_counter = st.rule_counter.clone();
 
-        rayon::spawn(move || {
+        let task = move || {
             for (inputs, options, sender) in task_receiver {
                 let id = rule_counter.fetch_add(1, Ordering::AcqRel);
                 let inputs: serde_json::Value =
@@ -595,7 +595,11 @@ async fn register_rule(
                     rule_senders.lock().unwrap().insert(id, sender);
                 }
             }
-        });
+        };
+        #[cfg(feature = "rayon")]
+        rayon::spawn(task);
+        #[cfg(not(feature = "rayon"))]
+        std::thread::spawn(task);
     }
 
     struct Guard {

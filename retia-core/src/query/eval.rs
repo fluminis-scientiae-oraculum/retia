@@ -13,7 +13,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use itertools::Itertools;
 use log::{debug, trace};
 use miette::Result;
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), feature = "rayon"))]
 use rayon::prelude::*;
 
 use crate::data::aggr::Aggregation;
@@ -181,37 +181,35 @@ impl<'a> SessionTx<'a> {
                     };
                     Ok((k, new_store))
                 };
-                #[cfg(not(target_arch = "wasm32"))]
+                let limiter_enabled = limiter.total.is_some();
+                for res in prog
+                    .iter()
+                    .filter(|(symb, _)| limiter_enabled && symb.is_prog_entry())
+                    .map(execution)
                 {
-                    let limiter_enabled = limiter.total.is_some();
-                    for res in prog
-                        .iter()
-                        .filter(|(symb, _)| limiter_enabled && symb.is_prog_entry())
-                        .map(execution)
-                    {
-                        let (k, new_store) = res?;
-                        to_merge.insert(k, new_store);
-                        if limiter.is_stopped() {
-                            break;
-                        }
-                    }
-
-                    let execs = prog
-                        .par_iter()
-                        .filter(|(symb, _)| !(limiter_enabled && symb.is_prog_entry()))
-                        .map(execution);
-
-                    for res in execs.collect::<Vec<_>>() {
-                        let (k, new_store) = res?;
-                        to_merge.insert(k, new_store);
+                    let (k, new_store) = res?;
+                    to_merge.insert(k, new_store);
+                    if limiter.is_stopped() {
+                        break;
                     }
                 }
-                #[cfg(target_arch = "wasm32")]
-                {
-                    for res in prog.iter().map(execution) {
-                        let (k, new_store) = res?;
-                        to_merge.insert(k, new_store);
-                    }
+
+                #[cfg(all(not(target_arch = "wasm32"), feature = "rayon"))]
+                let execs: Vec<_> = prog
+                    .par_iter()
+                    .filter(|(symb, _)| !(limiter_enabled && symb.is_prog_entry()))
+                    .map(execution)
+                    .collect();
+                #[cfg(not(all(not(target_arch = "wasm32"), feature = "rayon")))]
+                let execs: Vec<_> = prog
+                    .iter()
+                    .filter(|(symb, _)| !(limiter_enabled && symb.is_prog_entry()))
+                    .map(execution)
+                    .collect();
+
+                for res in execs {
+                    let (k, new_store) = res?;
+                    to_merge.insert(k, new_store);
                 }
             } else {
                 // Follow up epoch > 0
@@ -255,37 +253,35 @@ impl<'a> SessionTx<'a> {
                     };
                     Ok((k, new_store))
                 };
-                #[cfg(not(target_arch = "wasm32"))]
+                let limiter_enabled = limiter.total.is_some();
+                // entry rules with limiter must execute sequentially in order to get deterministic ordering
+                for res in prog
+                    .iter()
+                    .filter(|(symb, _)| limiter_enabled && symb.is_prog_entry())
+                    .map(execution)
                 {
-                    let limiter_enabled = limiter.total.is_some();
-                    // entry rules with limiter must execute sequentially in order to get deterministic ordering
-                    for res in prog
-                        .iter()
-                        .filter(|(symb, _)| limiter_enabled && symb.is_prog_entry())
-                        .map(execution)
-                    {
-                        let (k, new_store) = res?;
-                        to_merge.insert(k, new_store);
-                        if limiter.is_stopped() {
-                            break;
-                        }
-                    }
-
-                    let execs = prog
-                        .par_iter()
-                        .filter(|(symb, _)| !(limiter_enabled && symb.is_prog_entry()))
-                        .map(execution);
-                    for res in execs.collect::<Vec<_>>() {
-                        let (k, new_store) = res?;
-                        to_merge.insert(k, new_store);
+                    let (k, new_store) = res?;
+                    to_merge.insert(k, new_store);
+                    if limiter.is_stopped() {
+                        break;
                     }
                 }
-                #[cfg(target_arch = "wasm32")]
-                {
-                    for res in prog.iter().map(execution) {
-                        let (k, new_store) = res?;
-                        to_merge.insert(k, new_store);
-                    }
+
+                #[cfg(all(not(target_arch = "wasm32"), feature = "rayon"))]
+                let execs: Vec<_> = prog
+                    .par_iter()
+                    .filter(|(symb, _)| !(limiter_enabled && symb.is_prog_entry()))
+                    .map(execution)
+                    .collect();
+                #[cfg(not(all(not(target_arch = "wasm32"), feature = "rayon")))]
+                let execs: Vec<_> = prog
+                    .iter()
+                    .filter(|(symb, _)| !(limiter_enabled && symb.is_prog_entry()))
+                    .map(execution)
+                    .collect();
+                for res in execs {
+                    let (k, new_store) = res?;
+                    to_merge.insert(k, new_store);
                 }
             }
             let mut changed = false;

@@ -7,10 +7,17 @@ authors = ["Ziyang Hu", "Aditya Kresna"]
 license = "MPL-2.0"
 homepage = "https://flusci.org"
 repository = "https://github.com/fluminis-scientiae-oraculum/retia"
-documentation = "https://github.com/fluminis-scientiae-oraculum/retia"
+documentation = "https://docs.rs/retia"
+readme = "README.md"
+keywords = ["database", "datalog", "graph", "embedded", "query"]
+categories = ["database-implementations", "database"]
 exclude = [
     "tests/*",
 ]
+
+[package.metadata.docs.rs]
+features = ["storage-sqlite", "graph-algo", "requests"]
+rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
 #! # Features
@@ -51,12 +58,6 @@ wasm = ["uuid/js", "dep:js-sys"]
 ## and may not be stable enough. In general you should use RocksDB instead.
 ## The Sled engine does not support time travel.
 storage-sled = ["dep:sled"]
-## Enables the [TiKV](https://tikv.org/) client backend.
-## The only reason that you may want to use this is that your data does not fit in a single machine.
-## This engine is orders of magnitude slower than every other engine for graph traversals, due to the
-## significant network overhead. Simple point-lookup queries are fine, though.
-## The TiKV engine does not support time travel.
-storage-tikv = ["dep:tikv-client", "dep:tokio"]
 
 #! # Recommendation for features to enable
 #!
@@ -122,12 +123,18 @@ tikv-jemallocator-global = { version = "0.7", optional = true }
 retia-rocks = { path = "../retia-rocks", version = "0.1.0", optional = true }
 rocksdb = { version = "0.24", optional = true }
 sled = { version = "0.34.7", optional = true }
-tikv-client = { version = "0.4", optional = true }
-tokio = { version = "1.37.0", optional = true }
 sqlite = { version = "0.37", optional = true }
 sqlite3-src = { version = "0.7", optional = true }
 js-sys = { version = "0.3.60", optional = true }
-graph = { git = "https://github.com/fluminis-scientiae-oraculum/graph.git", optional = true }
+# NOTE: real `cargo publish` requires either (a) publishing the
+#       fluminis-scientiae-oraculum fork of `graph` to crates.io under a new
+#       name (e.g. `fluminis-graph`) and depending on it from there, or
+#       (b) dropping the `git = ...` line and falling back to upstream
+#       `graph 0.3.2` from crates.io (acceptable if the upstream rayon 1.10
+#       pin is no longer a blocker). The `version` field below is required
+#       by cargo to make `cargo package` succeed; on `cargo publish`, cargo
+#       strips the `git` source and the registry version takes over.
+graph = { git = "https://github.com/fluminis-scientiae-oraculum/graph.git", version = "0.3", optional = true }
 crossbeam = "0.8.4"
 ndarray = { version = "0.17", features = ["serde"] }
 sha2 = "0.10"

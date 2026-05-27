@@ -8,6 +8,8 @@ license = "MPL-2.0"
 homepage = "https://flusci.org"
 repository = "https://github.com/fluminis-scientiae-oraculum/retia"
 documentation = "https://github.com/fluminis-scientiae-oraculum/retia"
+readme = "README.md"
+publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]

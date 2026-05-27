@@ -8,17 +8,18 @@ authors = ["Ziyang Hu", "Aditya Kresna"]
 homepage = "https://flusci.org"
 repository = "https://github.com/fluminis-scientiae-oraculum/retia"
 documentation = "https://github.com/fluminis-scientiae-oraculum/retia"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+readme = "README.md"
+keywords = ["database", "datalog", "graph", "server", "repl"]
+categories = ["database", "command-line-utilities"]
 
 [features]
 #! # Features
 
-## Enables the `minimal`, `requests` and `graph-algo` features
-compact = ["minimal", "requests", "graph-algo"]
-## Enables the `storage-sqlite` and `graph-algo` features
-mobile = ["storage-sqlite", "graph-algo"]
-## Enables the `minimal`, `requests` and `graph-algo` features in single threaded mode
+## Enables the `minimal`, `requests`, `graph-algo` and `rayon` features
+compact = ["minimal", "requests", "graph-algo", "rayon"]
+## Enables the `storage-sqlite`, `graph-algo` and `rayon` features
+mobile = ["storage-sqlite", "graph-algo", "rayon"]
+## Enables the `minimal`, `requests` and `graph-algo` features in single threaded mode (no rayon)
 compact-single-threaded = ["minimal", "requests", "graph-algo"]
 ## Enables the `storage-sqlite` feature
 minimal = ["storage-sqlite"]
@@ -26,8 +27,8 @@ minimal = ["storage-sqlite"]
 storage-sqlite = ["retia/storage-sqlite"]
 ## Enables the [RocksDB](http://rocksdb.org/) backend
 storage-rocksdb = ["retia/storage-rocksdb"]
-## Enables the graph algorithms
-graph-algo = ["retia/graph-algo"]
+## Enables the graph algorithms (parallel; pulls rayon in retia-core)
+graph-algo = ["retia/graph-algo", "rayon"]
 ## Allows the utilities to make web requests to fetch data
 requests = ["retia/requests"]
 ## Uses jemalloc as the global allocator, can make a difference in performance
@@ -36,8 +37,8 @@ jemalloc = ["retia/jemalloc"]
 io-uring = ["retia/io-uring"]
 ## Enables the [Sled](https://github.com/spacejam/sled) backend
 storage-sled = ["retia/storage-sled"]
-## Enables the [TiKV](https://tikv.org/) client backend
-storage-tikv = ["retia/storage-tikv"]
+## Use rayon's work-stealing pool for the fixed-rule SSE handler thread; falls back to std::thread when off.
+rayon = ["dep:rayon", "retia/rayon"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -65,4 +66,4 @@ futures = "0.3.30"
 crossbeam = "0.8.4"
 eventsource-client = "0.17"
 tower-http = { version = "0.6", features = ["full"] }
-rayon = "1"
+rayon = { version = "1", optional = true }

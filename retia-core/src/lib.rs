@@ -67,8 +67,6 @@ pub use storage::newrocks::{new_retia_newrocksdb, NewRocksDbStorage};
 pub use storage::sled::{new_retia_sled, SledStorage};
 #[cfg(feature = "storage-sqlite")]
 pub use storage::sqlite::{new_retia_sqlite, SqliteStorage};
-#[cfg(feature = "storage-tikv")]
-pub use storage::tikv::{new_retia_tikv, TiKvStorage};
 pub use storage::{Storage, StoreTx};
 
 pub use crate::data::expr::Expr;
@@ -119,9 +117,6 @@ pub enum DbInstance {
     #[cfg(feature = "storage-sled")]
     /// Sled storage (experimental)
     Sled(Db<SledStorage>),
-    #[cfg(feature = "storage-tikv")]
-    /// TiKV storage (experimental)
-    TiKv(Db<TiKvStorage>),
 }
 
 impl Default for DbInstance {
@@ -139,13 +134,12 @@ impl DbInstance {
     /// * `rocksdb`
     /// * `newrocksdb`
     /// * `sled`
-    /// * `tikv`
     ///
     /// assuming all features are enabled during compilation. Otherwise only
     /// some of the engines are available. The `mem` engine is always available.
     ///
-    /// `path` is ignored for `mem` and `tikv` engines.
-    /// `options` is ignored for every engine except `tikv`.
+    /// `path` is ignored for `mem`.
+    /// `options` is ignored for every engine.
     #[allow(unused_variables)]
     pub fn new(engine: &str, path: impl AsRef<Path>, options: &str) -> Result<Self> {
         let options = if options.is_empty() { "{}" } else { options };
@@ -159,16 +153,6 @@ impl DbInstance {
             "newrocksdb" => Self::NewRocksDb(new_retia_newrocksdb(path)?),
             #[cfg(feature = "storage-sled")]
             "sled" => Self::Sled(new_retia_sled(path)?),
-            #[cfg(feature = "storage-tikv")]
-            "tikv" => {
-                #[derive(serde_derive::Deserialize)]
-                struct TiKvOpts {
-                    end_points: Vec<String>,
-                    optimistic: bool,
-                }
-                let opts: TiKvOpts = serde_json::from_str(options).into_diagnostic()?;
-                Self::TiKv(new_retia_tikv(opts.end_points.clone(), opts.optimistic)?)
-            }
             k => bail!(
                 "database engine '{}' not supported (maybe not compiled in)",
                 k
@@ -196,8 +180,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.get_fixed_rules(),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.get_fixed_rules(),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.get_fixed_rules(),
         }
     }
     /// Dispatcher method. See [crate::Db::run_script].
@@ -235,8 +217,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.run_script_ast(payload, cur_vld, mutability),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.run_script_ast(payload, cur_vld, mutability),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.run_script_ast(payload, cur_vld, mutability),
         }
     }
     /// Run the RetiaScript passed in. The `params` argument is a map of parameters.
@@ -310,8 +290,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.export_relations(relations),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.export_relations(relations),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.export_relations(relations),
         }
     }
     /// Export relations to JSON-encoded string.
@@ -352,8 +330,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.import_relations(data),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.import_relations(data),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.import_relations(data),
         }
     }
     /// Import a relation, the data is given as a JSON string, and the returned result is converted into a string.
@@ -395,8 +371,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.backup_db(out_file),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.backup_db(out_file),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.backup_db(out_file),
         }
     }
     /// Backup the running database into an Sqlite file, with JSON string return value.
@@ -419,8 +393,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.restore_backup(in_file),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.restore_backup(in_file),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.restore_backup(in_file),
         }
     }
     /// Restore from an Sqlite backup, with JSON string return value.
@@ -447,8 +419,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.import_from_backup(in_file, relations),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.import_from_backup(in_file, relations),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.import_from_backup(in_file, relations),
         }
     }
     /// Import relations from an Sqlite backup, with JSON string return value.
@@ -487,8 +457,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.register_callback(relation, capacity),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.register_callback(relation, capacity),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.register_callback(relation, capacity),
         }
     }
 
@@ -505,8 +473,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.unregister_callback(id),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.unregister_callback(id),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.unregister_callback(id),
         }
     }
     /// Dispatcher method. See [crate::Db::register_fixed_rule].
@@ -524,8 +490,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.register_fixed_rule(name, rule_impl),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.register_fixed_rule(name, rule_impl),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.register_fixed_rule(name, rule_impl),
         }
     }
     /// Dispatcher method. See [crate::Db::unregister_fixed_rule]
@@ -540,8 +504,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.unregister_fixed_rule(name),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.unregister_fixed_rule(name),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.unregister_fixed_rule(name),
         }
     }
 
@@ -562,8 +524,6 @@ impl DbInstance {
             DbInstance::NewRocksDb(db) => db.run_multi_transaction(write, payloads, results),
             #[cfg(feature = "storage-sled")]
             DbInstance::Sled(db) => db.run_multi_transaction(write, payloads, results),
-            #[cfg(feature = "storage-tikv")]
-            DbInstance::TiKv(db) => db.run_multi_transaction(write, payloads, results),
         }
     }
     /// A higher-level, blocking wrapper for [crate::Db::run_multi_transaction]. Runs the transaction on a dedicated thread.
@@ -572,9 +532,9 @@ impl DbInstance {
         let (app2db_send, app2db_recv) = bounded(1);
         let (db2app_send, db2app_recv) = bounded(1);
         let db = self.clone();
-        #[cfg(target_arch = "wasm32")]
+        #[cfg(any(target_arch = "wasm32", not(feature = "rayon")))]
         std::thread::spawn(move || db.run_multi_transaction(write, app2db_recv, db2app_send));
-        #[cfg(not(target_arch = "wasm32"))]
+        #[cfg(all(not(target_arch = "wasm32"), feature = "rayon"))]
         rayon::spawn(move || db.run_multi_transaction(write, app2db_recv, db2app_send));
         MultiTransaction {
             sender: app2db_send,

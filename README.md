@@ -135,7 +135,6 @@ See [`retia-wasm/README.md`](./retia-wasm/README.md) for browser usage.
 | `rocksdb`  | Yes         | High concurrency and performance. Uses the bundled `retia-rocks` (C++ via cxx). Long compile.     |
 | `newrocksdb` | Yes       | Same RocksDB engine, but via the crates.io `rocksdb` crate. Lighter build.                        |
 | `sled`     | Yes         | Experimental. No time-travel support. Generally prefer RocksDB.                                   |
-| `tikv`     | Yes         | Experimental. Distributed. Significant network overhead. No time-travel support.                  |
 
 Enable engines via Cargo features on `retia`:
 
@@ -197,6 +196,8 @@ If you need a CozoDB binding for Python, Node.js, Java/JVM, Clojure, Swift/iOS, 
 ## Status
 
 Pre-1.0 fork. No API or storage stability is promised. Track upstream CozoDB for production use; track this fork only if you are building inside `fluminis-scientiae-oraculum` or you specifically want a slimmer Rust-only build.
+
+Distributed storage (TiKV) is **out of scope** for this fork — the `storage-tikv` feature was removed to eliminate its transitive `tonic 0.10` / `rustls 0.21` / `protobuf 2.28` CVE chain. If you need TiKV, build against upstream CozoDB.
 
 Bug reports and PRs welcome at the [fork repository](https://github.com/fluminis-scientiae-oraculum/retia). Issues with the query language, query engine internals, or features inherited from upstream are likely best filed [upstream](https://github.com/cozodb/cozo/issues) where they will benefit a larger audience.
 

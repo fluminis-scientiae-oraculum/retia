@@ -7,8 +7,25 @@ authors = ["Ziyang Hu", "Aditya Kresna"]
 description = "Bindings to RocksDB used by the retia crate (fork of cozorocks)"
 homepage = "https://flusci.org"
 repository = "https://github.com/fluminis-scientiae-oraculum/retia"
-documentation = "https://github.com/fluminis-scientiae-oraculum/retia"
-exclude = ["rocksdb/docs", "rocksdb/java"]
+documentation = "https://docs.rs/retia-rocks"
+readme = "README.md"
+keywords = ["rocksdb", "database", "key-value", "cxx", "bindings"]
+categories = ["database-implementations", "external-ffi-bindings"]
+exclude = [
+    "rocksdb/.git",
+    "rocksdb/.github",
+    "rocksdb/docs",
+    "rocksdb/java",
+    "rocksdb/tools",
+    "rocksdb/microbench",
+    "rocksdb/fuzz",
+    "rocksdb/db_stress_tool",
+    "rocksdb/examples",
+    "rocksdb/buckifier",
+    "rocksdb/.circleci",
+    "rocksdb/.travis.yml",
+    "rocksdb/.gitignore",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
