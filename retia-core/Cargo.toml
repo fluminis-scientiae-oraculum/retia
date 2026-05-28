@@ -1,6 +1,6 @@
 [package]
 name = "retia"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "A general-purpose, transactional, relational database that uses Datalog and focuses on graph data and algorithms. Rust-only fork of CozoDB."
 authors = ["Ziyang Hu", "Aditya Kresna"]
@@ -115,7 +115,7 @@ document-features = "0.2.8"
 rayon = { version = "1", optional = true }
 minreq = { version = "3.0.0-rc.1", features = ["https-rustls"], optional = true }
 tikv-jemallocator-global = { version = "0.7", optional = true }
-retia-rocks = { path = "../retia-rocks", version = "0.1.0", optional = true }
+retia-rocks = { path = "../retia-rocks", version = "0.1.1", optional = true }
 rocksdb = { version = "0.24", optional = true }
 sqlite = { version = "0.37", optional = true }
 sqlite3-src = { version = "0.7", optional = true }

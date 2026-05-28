@@ -1,6 +1,6 @@
 [package]
 name = "retia-examples"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MPL-2.0"
 description = "Example code for the retia crate"
@@ -9,7 +9,7 @@ repository = "https://github.com/fluminis-scientiae-oraculum/retia"
 publish = false
 
 [dependencies]
-retia = { version = "0.1.0", path = "../retia-core", default-features = false, features = [
+retia = { version = "0.1.1", path = "../retia-core", default-features = false, features = [
     "rayon",
 ] }
 

@@ -1,6 +1,6 @@
 [package]
 name = "retia-bin"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MPL-2.0"
 description = "Standalone Retia database (Rust-only fork of cozo-bin)"
@@ -41,7 +41,7 @@ rayon = ["dep:rayon", "retia/rayon"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-retia = { version = "0.1.0", path = "../retia-core", default-features = false }
+retia = { version = "0.1.1", path = "../retia-core", default-features = false }
 clap = { version = "4.5.4", features = ["derive"] }
 env_logger = "0.11.3"
 log = "0.4.21"

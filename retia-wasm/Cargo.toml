@@ -1,6 +1,6 @@
 [package]
 name = "retia-wasm"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Retia database for WASM (Rust-only fork of cozo-lib-wasm)"
 authors = ["Ziyang Hu", "Aditya Kresna"]
@@ -19,7 +19,7 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2"
-retia = { version = "0.1.0", path = "../retia-core", default-features = false, features = ["wasm"] }
+retia = { version = "0.1.1", path = "../retia-core", default-features = false, features = ["wasm"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

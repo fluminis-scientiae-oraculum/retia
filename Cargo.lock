@@ -2822,7 +2822,7 @@ checksum = "dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a"
 
 [[package]]
 name = "retia"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aho-corasick",
  "approx",
@@ -2882,7 +2882,7 @@ dependencies = [
 
 [[package]]
 name = "retia-bin"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-stream",
  "axum",
@@ -2912,14 +2912,14 @@ dependencies = [
 
 [[package]]
 name = "retia-examples"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "retia",
 ]
 
 [[package]]
 name = "retia-rocks"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "cc",
  "cxx",
@@ -2934,7 +2934,7 @@ dependencies = [
 
 [[package]]
 name = "retia-wasm"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "console_error_panic_hook",
  "retia",
