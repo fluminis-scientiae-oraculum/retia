@@ -120,15 +120,11 @@ rocksdb = { version = "0.24", optional = true }
 sqlite = { version = "0.37", optional = true }
 sqlite3-src = { version = "0.7", optional = true }
 js-sys = { version = "0.3.60", optional = true }
-# NOTE: real `cargo publish` requires either (a) publishing the
-#       fluminis-scientiae-oraculum fork of `graph` to crates.io under a new
-#       name (e.g. `fluminis-graph`) and depending on it from there, or
-#       (b) dropping the `git = ...` line and falling back to upstream
-#       `graph 0.3.2` from crates.io (acceptable if the upstream rayon 1.10
-#       pin is no longer a blocker). The `version` field below is required
-#       by cargo to make `cargo package` succeed; on `cargo publish`, cargo
-#       strips the `git` source and the registry version takes over.
-graph = { git = "https://github.com/fluminis-scientiae-oraculum/graph.git", version = "0.3", optional = true }
+# Community-maintained fso-graph fork on crates.io (Rust-only, rayon
+# constraint relaxed, TARmageddon fix). Aliased as `graph` so the rest of
+# retia-core can keep its `use graph::prelude::*` imports unchanged.
+# fso-graph 0.3.3 pulls fso-graph-builder 0.4.3 transitively.
+graph = { package = "fso-graph", version = "0.3.3", optional = true }
 crossbeam = "0.8.4"
 ndarray = { version = "0.17", features = ["serde"] }
 sha2 = "0.10"

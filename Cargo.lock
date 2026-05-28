@@ -1136,6 +1136,47 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42703706b716c37f96a77aea830392ad231f44c9e9a67872fa5548707e11b11c"
 
 [[package]]
+name = "fso-graph"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0060fcaeef21744986b042e1219e6e5938acc3e6c112e642a7fa468090f799ed"
+dependencies = [
+ "ahash 0.8.12",
+ "atomic_float",
+ "fso-graph-builder",
+ "log",
+ "nanorand",
+ "num-format",
+ "rayon",
+]
+
+[[package]]
+name = "fso-graph-builder"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68dcf13a8c4f7bcb71a1487c6588b83b8c99da8ac68edf3588248515f6623307"
+dependencies = [
+ "atoi",
+ "atomic",
+ "byte-slice-cast",
+ "bytemuck",
+ "dashmap",
+ "delegate",
+ "fast-float2",
+ "linereader",
+ "log",
+ "memmap2",
+ "num",
+ "num-format",
+ "num_cpus",
+ "page_size",
+ "parking_lot",
+ "rayon",
+ "rustc-hash",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "futures"
 version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1224,15 +1265,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fxhash"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
-dependencies = [
- "byteorder",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1290,45 +1322,6 @@ name = "glob"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
-
-[[package]]
-name = "graph"
-version = "0.3.2"
-source = "git+https://github.com/fluminis-scientiae-oraculum/graph.git#d80a8905012b205830594c723406b8d839cb56cd"
-dependencies = [
- "ahash 0.8.12",
- "atomic_float",
- "graph_builder",
- "log",
- "nanorand",
- "num-format",
- "rayon",
-]
-
-[[package]]
-name = "graph_builder"
-version = "0.4.1"
-source = "git+https://github.com/fluminis-scientiae-oraculum/graph.git#d80a8905012b205830594c723406b8d839cb56cd"
-dependencies = [
- "atoi",
- "atomic",
- "byte-slice-cast",
- "bytemuck",
- "dashmap",
- "delegate",
- "fast-float2",
- "fxhash",
- "linereader",
- "log",
- "memmap2",
- "num",
- "num-format",
- "num_cpus",
- "page_size",
- "parking_lot",
- "rayon",
- "thiserror 2.0.18",
-]
 
 [[package]]
 name = "h2"
@@ -2844,7 +2837,7 @@ dependencies = [
  "either",
  "env_logger",
  "fast2s",
- "graph",
+ "fso-graph",
  "itertools 0.14.0",
  "jieba-rs",
  "js-sys",
