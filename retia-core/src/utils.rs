@@ -18,7 +18,7 @@ pub(crate) fn swap_option_result<T, E>(d: Result<Option<T>, E>) -> Option<Result
 #[derive(Default)]
 pub(crate) struct TempCollector<T: Clone + serde::Serialize + for<'a> serde::Deserialize<'a>> {
     // pub(crate) inner: Vec<T>,
-    pub(crate) inner: swapvec::SwapVec<T>,
+    pub(crate) inner: crate::swapvec::SwapVec<T>,
 }
 
 impl<T: Clone + serde::Serialize + for<'a> serde::Deserialize<'a>> TempCollector<T> {

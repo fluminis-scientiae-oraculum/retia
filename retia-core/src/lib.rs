@@ -85,6 +85,7 @@ pub mod parse;
 pub(crate) mod query;
 pub(crate) mod runtime;
 pub(crate) mod storage;
+pub(crate) mod swapvec;
 pub(crate) mod utils;
 
 /// A dispatcher for concrete storage implementations, wrapping [Db]. This is done so that
