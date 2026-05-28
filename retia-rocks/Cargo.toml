@@ -16,7 +16,6 @@ exclude = [
     "rocksdb/.github",
     "rocksdb/docs",
     "rocksdb/java",
-    "rocksdb/tools",
     "rocksdb/microbench",
     "rocksdb/fuzz",
     "rocksdb/db_stress_tool",
@@ -25,6 +24,12 @@ exclude = [
     "rocksdb/.circleci",
     "rocksdb/.travis.yml",
     "rocksdb/.gitignore",
+    # `rocksdb/tools` cannot be excluded wholesale — `rocksdb_lib_sources.txt`
+    # references `tools/dump/db_dump_tool.cc`. Trim the bench / analyzer
+    # subdirs only.
+    "rocksdb/tools/advisor",
+    "rocksdb/tools/block_cache_analyzer",
+    "rocksdb/tools/dbench_monitor",
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
