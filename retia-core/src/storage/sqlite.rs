@@ -21,6 +21,11 @@ use crate::runtime::relation::{decode_tuple_from_kv, extend_tuple_from_v};
 use crate::storage::{Storage, StoreTx};
 use crate::utils::swap_option_result;
 
+/// How long a freshly-opened connection waits on a transiently locked database
+/// before returning `SQLITE_BUSY` (code 5). The timeout is per-connection, so
+/// the engine sets it on every connection it opens, not once at startup.
+const SQLITE_BUSY_TIMEOUT_MS: u32 = 5_000;
+
 /// The Sqlite storage engine
 #[derive(Clone)]
 pub struct SqliteStorage {
@@ -38,7 +43,7 @@ pub fn new_retia_sqlite(path: impl AsRef<Path>) -> Result<crate::Db<SqliteStorag
     if path.as_ref().to_str() == Some("") {
         bail!("empty path for sqlite storage")
     }
-    let conn = Connection::open_thread_safe(&path).into_diagnostic()?;
+    let conn = open_sqlite_connection(&path)?;
     let query = r#"
         create table if not exists retia
         (
@@ -59,13 +64,30 @@ pub fn new_retia_sqlite(path: impl AsRef<Path>) -> Result<crate::Db<SqliteStorag
     Ok(ret)
 }
 
+/// Open a thread-safe SQLite connection carrying the engine's `busy_timeout`, so
+/// a transiently locked database waits-and-retries instead of failing
+/// immediately with `SQLITE_BUSY`. Used everywhere the engine opens a connection
+/// — the initial one in [`new_retia_sqlite`] and each pool-miss in
+/// [`SqliteStorage::transact`] — because the timeout is per-connection and would
+/// otherwise only cover whichever single connection happened to set it.
+fn open_sqlite_connection(path: impl AsRef<Path>) -> Result<ConnectionThreadSafe> {
+    let conn = Connection::open_thread_safe(path).into_diagnostic()?;
+    {
+        let mut statement = conn
+            .prepare(format!("PRAGMA busy_timeout = {SQLITE_BUSY_TIMEOUT_MS};"))
+            .into_diagnostic()?;
+        while statement.next().into_diagnostic()? != State::Done {}
+    }
+    Ok(conn)
+}
+
 impl<'s> Storage<'s> for SqliteStorage {
     type Tx = SqliteTx<'s>;
 
     fn transact(&'s self, write: bool) -> Result<Self::Tx> {
         let conn = {
             match self.pool.lock().unwrap().pop() {
-                None => Connection::open_thread_safe(&self.name).into_diagnostic()?,
+                None => open_sqlite_connection(&self.name)?,
                 Some(conn) => conn,
             }
         };
@@ -422,5 +444,26 @@ impl<'l> Iterator for SkipIter<'l> {
 
     fn next(&mut self) -> Option<Self::Item> {
         swap_option_result(self.next_inner())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // A connection the engine hands out must carry the busy_timeout; without it a
+    // transiently locked database fails immediately with SQLITE_BUSY instead of
+    // waiting — the exact failure this engine-level default prevents.
+    #[test]
+    fn opened_connection_has_busy_timeout() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("busy_timeout.db");
+        let conn = open_sqlite_connection(&path).unwrap();
+        let mut statement = conn.prepare("PRAGMA busy_timeout;").unwrap();
+        assert!(matches!(statement.next().unwrap(), State::Row));
+        assert_eq!(
+            statement.read::<i64, _>(0).unwrap(),
+            i64::from(SQLITE_BUSY_TIMEOUT_MS)
+        );
     }
 }
