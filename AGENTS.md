@@ -61,6 +61,27 @@ cargo build -p retia --features storage-rocksdb --release
 
 `storage-tikv` and `storage-sled` were removed from this fork. `storage-tikv` pulled the upstream `tikv-client 0.4 → tonic 0.10 → rustls 0.21` chain (5 cargo-audit advisories); distributed storage is out of scope. `storage-sled` pulled four unmaintained-crate advisories (`adler`, `bincode`, `fxhash`, `instant`) via `sled 0.34.7`, and sled was experimental + lacking time-travel anyway. If you need either, build against upstream CozoDB.
 
+## Releasing (crates.io)
+
+Releases are automated by `.github/workflows/release.yml`, **gated behind the full
+lint + build + test suite** and triggered only when a **GitHub Release is published**.
+
+1. Bump `retia-core` plus any other changed member, and update each member's inter-crate
+   `retia = { version = "…" }` path-dep pin — including the `publish = false` members
+   (`retia-wasm`, `retia-examples`), or the workspace won't resolve. `retia-rocks`
+   versions independently; leave it unless it actually changed. Refresh `Cargo.lock`,
+   commit `release(x.y.z): …`, push `main`.
+2. Create a GitHub Release whose tag is the `retia` version (`v0.2.0` or `0.2.0`; a
+   leading `v` is stripped). The workflow fails if the tag ≠ the `retia` version.
+3. The `verify` job runs clippy (workspace + rayon-off + rotating + flash) and the test
+   suite; only on success does `publish` run, publishing `retia-rocks → retia → retia-bin`
+   in order. Any crate whose Cargo.toml version is already on crates.io is skipped, so
+   unchanged crates and re-runs are no-ops. `retia-wasm` / `retia-examples` are
+   `publish = false`.
+
+Requires the org/repo secret **`SECRET_DEPLOY_CRATEIO`** (a crates.io API token), exposed
+to the publish step as `CARGO_REGISTRY_TOKEN`.
+
 ## Clippy discipline
 
 `[workspace.lints]` in the root `Cargo.toml` sets `warnings = "deny"` for rustc and `clippy::all = "deny"`. CI runs `cargo clippy --workspace --lib --bins --tests -- -D warnings` on every PR; merges fail on any warning. A handful of pervasive upstream-cozo idioms are allow-listed at the workspace level (e.g. `missing_docs`, `dead_code`, `clippy::mutable_key_type`, `clippy::get_first`, `clippy::manual_repeat_n`) — tightening that list is fair game for a focused PR.
