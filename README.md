@@ -88,7 +88,7 @@ For the full query-language reference, see the upstream [CozoDB documentation](h
 
 ```toml
 [dependencies]
-retia = "0.1"
+retia = "0.2"
 ```
 
 Minimal usage:
