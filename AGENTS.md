@@ -55,6 +55,8 @@ cargo build -p retia --features storage-rocksdb --release
 | `requests`                | `minreq` (rustls)                | Lets queries fetch remote data inline.                              |
 | `jemalloc`                | `tikv-jemallocator-global`       | Desktop/server allocator override; benchmark per workload.          |
 | `io-uring`                | retia-rocks's io-uring           | Linux-only RocksDB tuning knob.                                     |
+| `rotating`                | SQLite pragma tuning (Linux-only)| SQLite on HDD/ZFS/RAID-5: WAL+NORMAL, 16K page, big cache/mmap. Excludes `flash`. See `docs/TUNING_STORAGE.md`. |
+| `flash`                   | SQLite pragma tuning (Linux-only)| SQLite on SSD/NVMe: WAL+NORMAL, big cache/mmap. Excludes `rotating`. See `docs/TUNING_STORAGE.md`. |
 | `wasm`                    | `uuid/js`, `js-sys`              | WASM polyfills. Pair with `wasm` target.                            |
 
 `storage-tikv` and `storage-sled` were removed from this fork. `storage-tikv` pulled the upstream `tikv-client 0.4 → tonic 0.10 → rustls 0.21` chain (5 cargo-audit advisories); distributed storage is out of scope. `storage-sled` pulled four unmaintained-crate advisories (`adler`, `bincode`, `fxhash`, `instant`) via `sled 0.34.7`, and sled was experimental + lacking time-travel anyway. If you need either, build against upstream CozoDB.

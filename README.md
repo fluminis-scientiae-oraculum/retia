@@ -147,6 +147,19 @@ When using the `rocksdb` engine, place a `options` file in the database director
 
 (Upstream CozoDB ships a `TUNING_ROCKSDB.md` document with sample settings; it is not yet ported into this fork.)
 
+### Tuning SQLite for rotating disks (ZFS / RAID-5)
+
+For the `sqlite` engine on spinning or parity storage, build with the Linux-only
+`rotating` feature (or `flash` for SSD/NVMe) to apply WAL + a seek-friendly pragma set
+(`synchronous=NORMAL`, larger page, large cache + mmap):
+
+```bash
+cargo build -p retia-bin -F compact,rotating
+```
+
+See [`docs/TUNING_STORAGE.md`](docs/TUNING_STORAGE.md) for what each profile sets, the
+durability trade-off, and the ZFS/RAID dataset settings to pair with it.
+
 ---
 
 ## Architecture

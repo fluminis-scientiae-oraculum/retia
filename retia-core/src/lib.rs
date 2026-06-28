@@ -29,6 +29,11 @@
 #![doc = document_features::document_features!()]
 #![warn(rust_2018_idioms, future_incompatible)]
 
+// `flash` and `rotating` select mutually-exclusive SQLite tuning profiles; enabling both at once is
+// a build error rather than letting one silently win. Mirrors the Linux-only stance of `io-uring`.
+#[cfg(all(feature = "flash", feature = "rotating"))]
+compile_error!("retia features `flash` and `rotating` are mutually exclusive; enable at most one");
+
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;

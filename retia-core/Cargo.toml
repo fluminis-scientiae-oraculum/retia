@@ -48,6 +48,14 @@ requests = ["dep:minreq"]
 jemalloc = ["dep:tikv-jemallocator-global", "retia-rocks?/jemalloc"]
 ## Enables io-uring option for the RocksDB storage
 io-uring = ["retia-rocks?/io-uring"]
+## Tunes the `storage-sqlite` backend for rotating media (HDD / ZFS / RAID-5):
+## WAL + `synchronous=NORMAL`, large page/cache/mmap, batched WAL checkpoint.
+## **Linux-only** (no-op on other targets); mutually exclusive with `flash`; needs `storage-sqlite`.
+rotating = []
+## Tunes the `storage-sqlite` backend for solid-state media (SSD / NVMe):
+## WAL + `synchronous=NORMAL`, large mmap/cache, frequent checkpoint, default page size.
+## **Linux-only** (no-op on other targets); mutually exclusive with `rotating`; needs `storage-sqlite`.
+flash = []
 ## Polyfills for the WASM target
 wasm = ["uuid/js", "dep:js-sys"]
 

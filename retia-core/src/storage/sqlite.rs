@@ -26,6 +26,110 @@ use crate::utils::swap_option_result;
 /// the engine sets it on every connection it opens, not once at startup.
 const SQLITE_BUSY_TIMEOUT_MS: u32 = 5_000;
 
+/// A compile-time SQLite tuning profile: the `PRAGMA`s the engine applies to every
+/// connection it opens. Selected by the mutually-exclusive `flash` / `rotating`
+/// Cargo features, and only on Linux — on any other target, and when neither feature
+/// is set, the baseline profile reproduces stock behavior (just `busy_timeout`).
+/// `None` means "leave SQLite's default untouched".
+struct SqliteTuning {
+    /// `PRAGMA page_size` (bytes). Only takes effect on a freshly-created database,
+    /// before any table exists; a silent no-op on an existing file without `VACUUM`.
+    /// Must precede `journal_mode = WAL`, hence it is emitted first in [`Self::pragmas`].
+    page_size: Option<u32>,
+    /// `PRAGMA journal_mode` (e.g. `WAL`); persisted in the database header.
+    journal_mode: Option<&'static str>,
+    /// `PRAGMA synchronous` (e.g. `NORMAL`); per-connection.
+    synchronous: Option<&'static str>,
+    /// `PRAGMA mmap_size` (bytes); per-connection.
+    mmap_size: Option<i64>,
+    /// `PRAGMA cache_size`; negative = KiB of memory, positive = pages. Per-connection.
+    cache_size: Option<i64>,
+    /// `PRAGMA temp_store` (e.g. `MEMORY`); per-connection.
+    temp_store: Option<&'static str>,
+    /// `PRAGMA wal_autocheckpoint` (pages); only meaningful in WAL mode.
+    wal_autocheckpoint: Option<u32>,
+    /// `PRAGMA busy_timeout` (ms); always applied.
+    busy_timeout_ms: u32,
+}
+
+impl SqliteTuning {
+    /// The `PRAGMA` statements to run on a freshly-opened connection, in dependency
+    /// order: `page_size` must come before `journal_mode = WAL` and table creation;
+    /// `busy_timeout` goes last so it is always applied.
+    fn pragmas(&self) -> Vec<String> {
+        let mut out = Vec::new();
+        if let Some(v) = self.page_size {
+            out.push(format!("PRAGMA page_size = {v};"));
+        }
+        if let Some(v) = self.journal_mode {
+            out.push(format!("PRAGMA journal_mode = {v};"));
+        }
+        if let Some(v) = self.synchronous {
+            out.push(format!("PRAGMA synchronous = {v};"));
+        }
+        if let Some(v) = self.mmap_size {
+            out.push(format!("PRAGMA mmap_size = {v};"));
+        }
+        if let Some(v) = self.cache_size {
+            out.push(format!("PRAGMA cache_size = {v};"));
+        }
+        if let Some(v) = self.temp_store {
+            out.push(format!("PRAGMA temp_store = {v};"));
+        }
+        if let Some(v) = self.wal_autocheckpoint {
+            out.push(format!("PRAGMA wal_autocheckpoint = {v};"));
+        }
+        out.push(format!("PRAGMA busy_timeout = {};", self.busy_timeout_ms));
+        out
+    }
+}
+
+/// Rotating media (HDD / ZFS / RAID-5): minimize seeks and small random writes.
+/// 16 KiB pages (pair with a ZFS `recordsize=16K`), a large page cache + mmap window
+/// to keep hot pages resident, and a big WAL autocheckpoint so WAL→main flushes are
+/// large and sequential. `synchronous=NORMAL` under WAL risks only the last commit on
+/// power loss, never corruption.
+#[cfg(all(target_os = "linux", feature = "rotating"))]
+const TUNING: SqliteTuning = SqliteTuning {
+    page_size: Some(16_384),
+    journal_mode: Some("WAL"),
+    synchronous: Some("NORMAL"),
+    mmap_size: Some(256 * 1024 * 1024),
+    cache_size: Some(-262_144),
+    temp_store: Some("MEMORY"),
+    wal_autocheckpoint: Some(10_000),
+    busy_timeout_ms: SQLITE_BUSY_TIMEOUT_MS,
+};
+
+/// Solid-state media (SSD / NVMe): random reads are cheap, so keep SQLite's small
+/// default page (lower write amplification) with a generous mmap + cache and frequent
+/// (default) checkpoints. `synchronous=NORMAL` under WAL for the same balance.
+#[cfg(all(target_os = "linux", feature = "flash", not(feature = "rotating")))]
+const TUNING: SqliteTuning = SqliteTuning {
+    page_size: None,
+    journal_mode: Some("WAL"),
+    synchronous: Some("NORMAL"),
+    mmap_size: Some(256 * 1024 * 1024),
+    cache_size: Some(-131_072),
+    temp_store: Some("MEMORY"),
+    wal_autocheckpoint: None,
+    busy_timeout_ms: SQLITE_BUSY_TIMEOUT_MS,
+};
+
+/// Baseline: stock SQLite behavior (only the busy timeout). Active when neither
+/// `flash` nor `rotating` is enabled, and on every non-Linux target.
+#[cfg(not(all(target_os = "linux", any(feature = "rotating", feature = "flash"))))]
+const TUNING: SqliteTuning = SqliteTuning {
+    page_size: None,
+    journal_mode: None,
+    synchronous: None,
+    mmap_size: None,
+    cache_size: None,
+    temp_store: None,
+    wal_autocheckpoint: None,
+    busy_timeout_ms: SQLITE_BUSY_TIMEOUT_MS,
+};
+
 /// The Sqlite storage engine
 #[derive(Clone)]
 pub struct SqliteStorage {
@@ -64,18 +168,17 @@ pub fn new_retia_sqlite(path: impl AsRef<Path>) -> Result<crate::Db<SqliteStorag
     Ok(ret)
 }
 
-/// Open a thread-safe SQLite connection carrying the engine's `busy_timeout`, so
-/// a transiently locked database waits-and-retries instead of failing
-/// immediately with `SQLITE_BUSY`. Used everywhere the engine opens a connection
-/// — the initial one in [`new_retia_sqlite`] and each pool-miss in
-/// [`SqliteStorage::transact`] — because the timeout is per-connection and would
-/// otherwise only cover whichever single connection happened to set it.
+/// Open a thread-safe SQLite connection and apply the active [`TUNING`] profile.
+/// Always sets `busy_timeout` (so a transiently locked database waits-and-retries
+/// instead of failing immediately with `SQLITE_BUSY`); under the `flash` / `rotating`
+/// features on Linux it also sets the WAL + cache/mmap/page tuning. Used everywhere the
+/// engine opens a connection — the initial one in [`new_retia_sqlite`] and each
+/// pool-miss in [`SqliteStorage::transact`] — because these pragmas are per-connection
+/// and would otherwise cover only whichever connection happened to set them.
 fn open_sqlite_connection(path: impl AsRef<Path>) -> Result<ConnectionThreadSafe> {
     let conn = Connection::open_thread_safe(path).into_diagnostic()?;
-    {
-        let mut statement = conn
-            .prepare(format!("PRAGMA busy_timeout = {SQLITE_BUSY_TIMEOUT_MS};"))
-            .into_diagnostic()?;
+    for pragma in TUNING.pragmas() {
+        let mut statement = conn.prepare(&pragma).into_diagnostic()?;
         while statement.next().into_diagnostic()? != State::Done {}
     }
     Ok(conn)
@@ -465,5 +568,61 @@ mod tests {
             statement.read::<i64, _>(0).unwrap(),
             i64::from(SQLITE_BUSY_TIMEOUT_MS)
         );
+    }
+
+    // The `rotating` profile (Linux-only) must apply WAL + the rotating-disk pragma set
+    // to every connection the engine opens.
+    #[cfg(all(target_os = "linux", feature = "rotating"))]
+    #[test]
+    fn rotating_profile_pragmas_applied() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("rotating.db");
+        let conn = open_sqlite_connection(&path).unwrap();
+        // Materialize the file so page_size is locked in at the configured value.
+        conn.execute("create table t(x);").unwrap();
+
+        let int_pragma = |name: &str| -> i64 {
+            let mut s = conn.prepare(format!("PRAGMA {name};")).unwrap();
+            assert!(matches!(s.next().unwrap(), State::Row), "{name} returned no row");
+            s.read::<i64, _>(0).unwrap()
+        };
+
+        let mut jm = conn.prepare("PRAGMA journal_mode;").unwrap();
+        assert!(matches!(jm.next().unwrap(), State::Row));
+        assert_eq!(jm.read::<String, _>(0).unwrap(), "wal");
+        drop(jm);
+
+        assert_eq!(int_pragma("page_size"), 16_384);
+        assert_eq!(int_pragma("synchronous"), 1); // NORMAL
+        assert_eq!(int_pragma("cache_size"), -262_144);
+        assert_eq!(int_pragma("mmap_size"), 256 * 1024 * 1024);
+        assert_eq!(int_pragma("busy_timeout"), i64::from(SQLITE_BUSY_TIMEOUT_MS));
+    }
+
+    // The `flash` profile (Linux-only) must apply WAL + the SSD pragma set, leaving
+    // page_size at SQLite's default.
+    #[cfg(all(target_os = "linux", feature = "flash"))]
+    #[test]
+    fn flash_profile_pragmas_applied() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("flash.db");
+        let conn = open_sqlite_connection(&path).unwrap();
+        conn.execute("create table t(x);").unwrap();
+
+        let int_pragma = |name: &str| -> i64 {
+            let mut s = conn.prepare(format!("PRAGMA {name};")).unwrap();
+            assert!(matches!(s.next().unwrap(), State::Row), "{name} returned no row");
+            s.read::<i64, _>(0).unwrap()
+        };
+
+        let mut jm = conn.prepare("PRAGMA journal_mode;").unwrap();
+        assert!(matches!(jm.next().unwrap(), State::Row));
+        assert_eq!(jm.read::<String, _>(0).unwrap(), "wal");
+        drop(jm);
+
+        assert_eq!(int_pragma("synchronous"), 1); // NORMAL
+        assert_eq!(int_pragma("cache_size"), -131_072);
+        assert_eq!(int_pragma("mmap_size"), 256 * 1024 * 1024);
+        assert_eq!(int_pragma("busy_timeout"), i64::from(SQLITE_BUSY_TIMEOUT_MS));
     }
 }

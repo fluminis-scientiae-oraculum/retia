@@ -23,7 +23,11 @@ lazy_static! {
         env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
         let creation = Instant::now();
         let path = "_test_air_routes";
-        _ = std::fs::remove_file(path);
+        // Clear leftovers from a prior run: the sqlite file plus its WAL sidecars
+        // (present when built with the `flash`/`rotating` features), and the rocksdb dir.
+        for suffix in ["", "-wal", "-shm"] {
+            _ = std::fs::remove_file(format!("{path}{suffix}"));
+        }
         _ = std::fs::remove_dir_all(path);
         let db_kind = env::var("RETIA_TEST_DB_ENGINE").unwrap_or("mem".to_string());
         println!("Using {} engine", db_kind);

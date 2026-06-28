@@ -35,6 +35,10 @@ requests = ["retia/requests"]
 jemalloc = ["retia/jemalloc"]
 ## Enables io-uring option for the RocksDB storage
 io-uring = ["retia/io-uring"]
+## Tunes the SQLite backend for rotating media (HDD / ZFS / RAID-5). Linux-only; mutually exclusive with `flash`.
+rotating = ["retia/rotating"]
+## Tunes the SQLite backend for solid-state media (SSD / NVMe). Linux-only; mutually exclusive with `rotating`.
+flash = ["retia/flash"]
 ## Use rayon's work-stealing pool for the fixed-rule SSE handler thread; falls back to std::thread when off.
 rayon = ["dep:rayon", "retia/rayon"]
 
