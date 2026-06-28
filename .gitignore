@@ -32,7 +32,7 @@ release.zip
 .fleet
 .vscode
 release/
-release*
+/release*
 Cross.toml
 /tools
 *.cozo_auth

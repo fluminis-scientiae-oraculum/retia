@@ -1,0 +1,107 @@
+name: Release (publish to crates.io)
+
+# Publishing is gated behind a full lint + build + test pass and runs ONLY when a
+# GitHub Release is *published*. Crates are published in dependency order and each is
+# skipped if its current Cargo.toml version is already on crates.io, so re-running a
+# release (or releasing when only some crates changed) is idempotent and never
+# republishes an unchanged crate (e.g. retia-rocks).
+#
+# Injection-safety: no untrusted `${{ github.event.* }}` is interpolated into any
+# run: block. The release tag and repo come from the $GITHUB_REF_NAME / $GITHUB_REPOSITORY
+# environment variables and are only assigned to quoted shell variables (never eval'd).
+on:
+  release:
+    types: [published]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  verify:
+    name: Gate (lint + build + test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install clippy
+        run: rustup component add clippy
+      - name: Clippy (workspace, -D warnings)
+        run: cargo clippy --workspace --lib --bins --tests --locked -- -D warnings
+      - name: Clippy (rayon-off path)
+        run: cargo clippy -p retia --no-default-features --features storage-sqlite --lib --tests --locked -- -D warnings
+      - name: Clippy (rotating profile)
+        run: cargo clippy -p retia --no-default-features --features storage-sqlite,rotating --lib --tests --locked -- -D warnings
+      - name: Clippy (flash profile)
+        run: cargo clippy -p retia --no-default-features --features storage-sqlite,flash --lib --tests --locked -- -D warnings
+      - name: Build (default)
+        run: cargo build -p retia --release --locked --verbose
+      - name: Test (default)
+        run: cargo test -p retia --release --locked --verbose
+      - name: Test (rayon-off path)
+        run: cargo test -p retia --no-default-features --features storage-sqlite --locked --verbose
+      - name: Test (rotating profile)
+        run: cargo test -p retia --no-default-features --features storage-sqlite,rotating --locked
+      - name: Test (flash profile)
+        run: cargo test -p retia --no-default-features --features storage-sqlite,flash --locked
+
+  publish:
+    name: Publish to crates.io
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Check release tag matches the `retia` version
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME#v}"
+          ver="$(cargo metadata --no-deps --format-version 1 \
+                 | jq -r '.packages[] | select(.name=="retia") | .version')"
+          echo "release tag=$tag  retia version=$ver"
+          if [ "$tag" != "$ver" ]; then
+            echo "::error::release tag ($tag) does not match retia version ($ver)"
+            exit 1
+          fi
+      - name: Publish changed crates in dependency order
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.SECRET_DEPLOY_CRATEIO }}
+        run: |
+          set -euo pipefail
+          ua="retia-release-ci (https://github.com/${GITHUB_REPOSITORY})"
+
+          on_crates_io () { # crate version -> exit 0 if that version is already published
+            curl -sf -A "$ua" "https://crates.io/api/v1/crates/$1/$2" >/dev/null 2>&1
+          }
+          version_of () {
+            cargo metadata --no-deps --format-version 1 \
+              | jq -r --arg c "$1" '.packages[] | select(.name==$c) | .version'
+          }
+          publish_if_absent () {
+            local crate="$1" ver
+            ver="$(version_of "$crate")"
+            if on_crates_io "$crate" "$ver"; then
+              echo "::notice::$crate $ver already on crates.io — skipping"
+              return 0
+            fi
+            echo "::notice::publishing $crate $ver"
+            cargo publish -p "$crate" --locked
+            echo "waiting for $crate $ver to index..."
+            for _ in $(seq 1 30); do
+              if on_crates_io "$crate" "$ver"; then echo "indexed"; return 0; fi
+              sleep 10
+            done
+            echo "::error::$crate $ver did not appear on crates.io within the timeout"
+            exit 1
+          }
+
+          # Dependency order. retia-rocks is only needed by retia's optional
+          # storage-rocksdb feature; publishing it first means a bumped version is
+          # indexed before retia resolves it. retia-wasm / retia-examples are
+          # publish = false and intentionally omitted.
+          publish_if_absent retia-rocks
+          publish_if_absent retia
+          publish_if_absent retia-bin
