@@ -158,7 +158,9 @@ cargo build -p retia-bin -F compact,rotating
 ```
 
 See [`docs/TUNING_STORAGE.md`](docs/TUNING_STORAGE.md) for what each profile sets, the
-durability trade-off, and the ZFS/RAID dataset settings to pair with it.
+durability trade-off, and the ZFS/RAID dataset settings to pair with it. Measured impact
+(up to ~184× small-transaction throughput on a ZFS HDD pool) is in
+[`docs/BENCHMARKS.md`](docs/BENCHMARKS.md).
 
 ---
 
