@@ -39,7 +39,7 @@ cargo build -p retia-bin -F compact,rotating          # or: -F compact,flash
 Embedding the library:
 
 ```toml
-retia = { version = "0.1", features = ["storage-sqlite", "rotating"] }
+retia = { version = "0.2", features = ["storage-sqlite", "rotating"] }
 ```
 
 The features require `storage-sqlite` to do anything (it is pulled in by `minimal`

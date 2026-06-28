@@ -138,7 +138,7 @@ See [`retia-wasm/README.md`](./retia-wasm/README.md) for browser usage.
 Enable engines via Cargo features on `retia`:
 
 ```toml
-retia = { version = "0.1", features = ["storage-sqlite", "storage-rocksdb"] }
+retia = { version = "0.2", features = ["storage-sqlite", "storage-rocksdb"] }
 ```
 
 ### Tuning RocksDB
