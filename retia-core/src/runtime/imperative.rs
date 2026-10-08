@@ -319,7 +319,7 @@ impl<'s, S: Storage<'s>> Db<S> {
                         #[diagnostic(code(eval::dangling_ctrl_flow))]
                         struct DanglingControlFlow(#[label] SourceSpan);
 
-                        bail!(DanglingControlFlow(span))
+                        bail!(DanglingControlFlow(span));
                     }
                 },
             }

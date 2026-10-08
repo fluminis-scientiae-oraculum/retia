@@ -136,7 +136,7 @@ impl StoredRelationMetadata {
             #[diagnostic(code(eval::required_col_not_provided))]
             struct ColumnNotProvided(String);
 
-            bail!(ColumnNotProvided(col.name.to_string()))
+            bail!(ColumnNotProvided(col.name.to_string()));
         }
         Ok(())
     }
@@ -154,7 +154,7 @@ impl StoredRelationMetadata {
                         col.name.to_string(),
                         target.typing.clone(),
                         col.typing.clone()
-                    ))
+                    ));
                 }
 
                 return Ok(());
@@ -166,7 +166,7 @@ impl StoredRelationMetadata {
         #[diagnostic(code(eval::required_col_not_found))]
         struct ColumnNotFound(String);
 
-        bail!(ColumnNotFound(col.name.to_string()))
+        bail!(ColumnNotFound(col.name.to_string()));
     }
 }
 
@@ -206,7 +206,7 @@ impl NullableColType {
                     #[diagnostic(code(eval::coercion_from_bot))]
                     struct DataCoercionFromBot;
 
-                    bail!(DataCoercionFromBot)
+                    bail!(DataCoercionFromBot);
                 }
                 d => d,
             },
@@ -217,7 +217,7 @@ impl NullableColType {
                 if matches!(data, DataValue::Str(_)) {
                     data
                 } else {
-                    bail!(make_err())
+                    bail!(make_err());
                 }
             }
             ColType::Bytes => match data {
@@ -232,7 +232,7 @@ impl NullableColType {
                         .map_err(|e| BadBase64EncodedString(e.to_string()))?;
                     DataValue::Bytes(b)
                 }
-                _ => bail!(make_err()),
+                _ => { bail!(make_err()); },
             },
             ColType::Uuid => DataValue::Uuid(UuidWrapper(data.get_uuid().ok_or_else(make_err)?)),
             ColType::List { eltype, len } => {
@@ -246,13 +246,13 @@ impl NullableColType {
                             .try_collect()?,
                     )
                 } else {
-                    bail!(make_err())
+                    bail!(make_err());
                 }
             }
             ColType::Vec { eltype, len } => match &data {
                 DataValue::List(l) => {
                     if l.len() != *len {
-                        bail!(BadListLength(self.clone(), l.len()))
+                        bail!(BadListLength(self.clone(), l.len()));
                     }
                     match eltype {
                         VecElementType::F32 => {
@@ -279,7 +279,7 @@ impl NullableColType {
                 }
                 DataValue::Vec(arr) => {
                     if *eltype != arr.el_type() || *len != arr.len() {
-                        bail!(make_err())
+                        bail!(make_err());
                     } else {
                         data
                     }
@@ -290,7 +290,7 @@ impl NullableColType {
                         VecElementType::F32 => {
                             let f32_count = bytes.len() / mem::size_of::<f32>();
                             if f32_count != *len {
-                                bail!(make_err())
+                                bail!(make_err());
                             }
                             let arr = unsafe {
                                 ndarray::ArrayView1::from_shape_ptr(
@@ -303,7 +303,7 @@ impl NullableColType {
                         VecElementType::F64 => {
                             let f64_count = bytes.len() / mem::size_of::<f64>();
                             if f64_count != *len {
-                                bail!(make_err())
+                                bail!(make_err());
                             }
                             let arr = unsafe {
                                 ndarray::ArrayView1::from_shape_ptr(
@@ -315,7 +315,7 @@ impl NullableColType {
                         }
                     }
                 }
-                _ => bail!(make_err()),
+                _ => { bail!(make_err()); },
             },
             ColType::Tuple(typ) => {
                 if let DataValue::List(l) = data {
@@ -327,7 +327,7 @@ impl NullableColType {
                             .try_collect()?,
                     )
                 } else {
-                    bail!(make_err())
+                    bail!(make_err());
                 }
             }
             ColType::Validity => {
@@ -359,7 +359,7 @@ impl NullableColType {
                                 st.duration_since(UNIX_EPOCH).unwrap().as_micros() as i64;
 
                             if microseconds == i64::MAX || microseconds == i64::MIN {
-                                bail!(InvalidValidity(DataValue::Str(s.into())))
+                                bail!(InvalidValidity(DataValue::Str(s.into())));
                             }
 
                             DataValue::Validity(Validity {
@@ -374,7 +374,7 @@ impl NullableColType {
                             let o_is_assert = l[1].get_bool();
                             if let (Some(ts), Some(is_assert)) = (o_ts, o_is_assert) {
                                 if ts == i64::MAX || ts == i64::MIN {
-                                    bail!(InvalidValidity(DataValue::List(l)))
+                                    bail!(InvalidValidity(DataValue::List(l)));
                                 }
                                 return Ok(DataValue::Validity(Validity {
                                     timestamp: ValidityTs(Reverse(ts)),
@@ -382,9 +382,9 @@ impl NullableColType {
                                 }));
                             }
                         }
-                        bail!(InvalidValidity(DataValue::List(l)))
+                        bail!(InvalidValidity(DataValue::List(l)));
                     }
-                    v => bail!(InvalidValidity(v)),
+                    v => { bail!(InvalidValidity(v)); },
                 }
             }
             ColType::Json => DataValue::Json(JsonData(match data {

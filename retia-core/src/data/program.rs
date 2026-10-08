@@ -1291,7 +1291,7 @@ impl SearchInput {
                 match r {
                     "tf_idf" => FtsScoreKind::TfIdf,
                     "tf" => FtsScoreKind::Tf,
-                    s => bail!("Unknown score kind for FTS: {}", s),
+                    s => { bail!("Unknown score kind for FTS: {}", s); },
                 }
             }
             None => FtsScoreKind::TfIdf,
@@ -1607,7 +1607,7 @@ impl SearchInput {
             relation: self.relation.to_string(),
             name: self.index.to_string(),
             span: self.span,
-        })
+        });
     }
 }
 

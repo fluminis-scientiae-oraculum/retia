@@ -194,7 +194,7 @@ impl<'a, 'b> FixedRuleInputRelation<'a, 'b> {
             .edges(it)
             .build();
         if let Some(err) = error {
-            bail!(err)
+            bail!(err);
         }
         Ok((graph, indices, inv_indices))
     }
@@ -321,7 +321,7 @@ impl<'a, 'b> FixedRuleInputRelation<'a, 'b> {
             .build();
 
         if let Some(err) = error {
-            bail!(err)
+            bail!(err);
         }
 
         Ok((graph, indices, inv_indices))

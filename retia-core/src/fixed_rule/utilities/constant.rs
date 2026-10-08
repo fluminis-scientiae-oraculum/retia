@@ -62,7 +62,7 @@ impl FixedRule for Constant {
                         "If you insist on using this empty rule, explicitly give its head"
                     ))]
                     struct EmptyConstRuleError(#[label] SourceSpan);
-                    bail!(EmptyConstRuleError(span))
+                    bail!(EmptyConstRuleError(span));
                 }
                 i => i,
             }
@@ -86,12 +86,12 @@ impl FixedRule for Constant {
             })?;
         let data = match data.clone().eval_to_const()? {
             DataValue::List(l) => l,
-            _ => bail!(WrongFixedRuleOptionError {
+            _ => { bail!(WrongFixedRuleOptionError {
                 name: "data".to_string(),
                 span: Default::default(),
                 rule_name: "Constant".to_string(),
                 help: "a list of lists is required".to_string(),
-            }),
+            }); },
         };
 
         let mut tuples = vec![];
@@ -127,7 +127,7 @@ impl FixedRule for Constant {
                     ))]
                     struct ConstRuleRowNotList(DataValue);
 
-                    bail!(ConstRuleRowNotList(row))
+                    bail!(ConstRuleRowNotList(row));
                 }
             }
         }

@@ -215,19 +215,19 @@ impl NormalFormInlineRule {
                         }
                     }
                     NormalFormAtom::Predicate(p) => {
-                        bail!(UnboundVariable(p.span()))
+                        bail!(UnboundVariable(p.span()));
                     }
                     NormalFormAtom::Unification(u) => {
-                        bail!(UnboundVariable(u.span))
+                        bail!(UnboundVariable(u.span));
                     }
                     NormalFormAtom::HnswSearch(s) => {
-                        bail!(UnboundVariable(s.span))
+                        bail!(UnboundVariable(s.span));
                     }
                     NormalFormAtom::FtsSearch(s) => {
-                        bail!(UnboundVariable(s.span))
+                        bail!(UnboundVariable(s.span));
                     }
                     NormalFormAtom::LshSearch(s) => {
-                        bail!(UnboundVariable(s.span))
+                        bail!(UnboundVariable(s.span));
                     }
                 }
             }

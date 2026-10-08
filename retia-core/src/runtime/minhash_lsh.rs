@@ -100,7 +100,7 @@ impl<'a> SessionTx<'a> {
                 let n_grams = tokenizer.unique_ngrams(&s, manifest.n_gram);
                 HashValues::new(n_grams.iter(), hash_perms)
             }
-            _ => bail!("Cannot put value {:?} into a LSH index", to_index),
+            _ => { bail!("Cannot put value {:?} into a LSH index", to_index); },
         };
         let bytes = min_hash.get_bytes();
 
@@ -153,7 +153,7 @@ impl<'a> SessionTx<'a> {
                 let n_grams = tokenizer.unique_ngrams(s, config.manifest.n_gram);
                 HashValues::new(n_grams.iter(), perms).get_bytes().to_vec()
             }
-            _ => bail!("Cannot search for value {:?} in a LSH index", q),
+            _ => { bail!("Cannot search for value {:?} in a LSH index", q); },
         };
         let chunk_size = config.manifest.n_rows_in_band * std::mem::size_of::<u32>();
         let mut key_prefix = Vec::with_capacity(1);

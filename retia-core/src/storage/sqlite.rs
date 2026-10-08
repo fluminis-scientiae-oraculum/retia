@@ -145,7 +145,7 @@ pub struct SqliteStorage {
 /// If you want a pure memory storage, use [`new_retia_mem`](crate::new_retia_mem).
 pub fn new_retia_sqlite(path: impl AsRef<Path>) -> Result<crate::Db<SqliteStorage>> {
     if path.as_ref().to_str() == Some("") {
-        bail!("empty path for sqlite storage")
+        bail!("empty path for sqlite storage");
     }
     let conn = open_sqlite_connection(&path)?;
     let query = r#"
@@ -388,7 +388,7 @@ impl<'s> StoreTx<'s> for SqliteTx<'s> {
                 while statement.next().into_diagnostic()? != State::Done {}
                 self.committed = true;
             } else {
-                bail!("multiple commits")
+                bail!("multiple commits");
             }
         }
         Ok(())
@@ -451,12 +451,12 @@ impl<'s> StoreTx<'s> for SqliteTx<'s> {
         statement.bind((1, lower)).unwrap();
         statement.bind((2, upper)).unwrap();
         match statement.next() {
-            Ok(State::Done) => bail!("range count query returned no rows"),
+            Ok(State::Done) => { bail!("range count query returned no rows"); },
             Ok(State::Row) => {
                 let k = statement.read::<i64, _>(0).unwrap();
                 Ok(k as usize)
             }
-            Err(err) => bail!(err),
+            Err(err) => { bail!(err); },
         }
     }
 

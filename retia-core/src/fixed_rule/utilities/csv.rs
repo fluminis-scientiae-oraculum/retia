@@ -98,7 +98,7 @@ impl FixedRule for CsvReader {
                         } else {
                             bail!(
                                 "encountered null value when processing CSV when non-null required"
-                            )
+                            );
                         }
                     }
                     Some(s) => {
@@ -111,7 +111,7 @@ impl FixedRule for CsvReader {
                                     if typ.nullable {
                                         DataValue::Null
                                     } else {
-                                        bail!(err)
+                                        bail!(err);
                                     }
                                 }
                             }),
@@ -121,7 +121,7 @@ impl FixedRule for CsvReader {
                                     if typ.nullable {
                                         DataValue::Null
                                     } else {
-                                        bail!(err)
+                                        bail!(err);
                                     }
                                 }
                             }),
@@ -132,13 +132,13 @@ impl FixedRule for CsvReader {
                                         if typ.nullable {
                                             out_tuple.push(DataValue::Null)
                                         } else {
-                                            bail!("cannot convert {} to type {}", s, typ)
+                                            bail!("cannot convert {} to type {}", s, typ);
                                         }
                                     }
                                     Some(i) => out_tuple.push(DataValue::from(i)),
                                 };
                             }
-                            _ => bail!("cannot convert {} to type {}", s, typ),
+                            _ => { bail!("cannot convert {} to type {}", s, typ); },
                         }
                     }
                 }
@@ -167,7 +167,7 @@ impl FixedRule for CsvReader {
                     }
                 }
                 #[cfg(not(feature = "requests"))]
-                bail!("the feature `requests` is not enabled for the build")
+                bail!("the feature `requests` is not enabled for the build");
             }
         }
         Ok(())
@@ -189,11 +189,11 @@ impl FixedRule for CsvReader {
                 val: DataValue::Bool(false),
                 ..
             }) => 0,
-            _ => bail!(CannotDetermineArity(
+            _ => { bail!(CannotDetermineArity(
                 "CsvReader".to_string(),
                 "invalid option 'prepend_index' given, expect a boolean".to_string(),
                 span
-            )),
+            )); },
         };
         let columns = options
             .get("types")
@@ -210,6 +210,6 @@ impl FixedRule for CsvReader {
             "CsvReader".to_string(),
             "invalid option 'types' given, expect positive number or list".to_string(),
             span
-        ))
+        ));
     }
 }

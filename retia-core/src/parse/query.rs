@@ -155,7 +155,7 @@ pub(crate) fn parse_query(
                                 bail!(MultipleRuleDefinitionError(
                                     e.key().name.to_string(),
                                     vec![rule.span, fixed_span]
-                                ))
+                                ));
                             }
                         }
                     }
@@ -904,7 +904,7 @@ fn parse_fixed_rule(
                                 bindings.push(symb);
                             } else {
                                 if !seen_bindings.insert(s) {
-                                    bail!(DuplicateBindingError(v.extract_span()))
+                                    bail!(DuplicateBindingError(v.extract_span()));
                                 }
                                 let symb = Symbol::new(s, v.extract_span());
                                 bindings.push(symb);
@@ -934,7 +934,7 @@ fn parse_fixed_rule(
                                         bindings.push(symb);
                                     } else {
                                         if !seen_bindings.insert(s) {
-                                            bail!(DuplicateBindingError(v.extract_span()))
+                                            bail!(DuplicateBindingError(v.extract_span()));
                                         }
                                         bindings.push(Symbol::new(v.as_str(), v.extract_span()))
                                     }
@@ -971,13 +971,13 @@ fn parse_fixed_rule(
                                     let v = match vs.next() {
                                         Some(vp) => {
                                             if !seen_bindings.insert(vp.as_str()) {
-                                                bail!(DuplicateBindingError(vp.extract_span()))
+                                                bail!(DuplicateBindingError(vp.extract_span()));
                                             }
                                             Symbol::new(vp.as_str(), vp.extract_span())
                                         }
                                         None => {
                                             if !seen_bindings.insert(kp.as_str()) {
-                                                bail!(DuplicateBindingError(kp.extract_span()))
+                                                bail!(DuplicateBindingError(kp.extract_span()));
                                             }
                                             Symbol::new(k.clone(), kp.extract_span())
                                         }
@@ -1096,7 +1096,7 @@ fn expr2vld_spec(expr: Expr, cur_vld: ValidityTs) -> Result<ValidityTs> {
             s => Ok(str2vld(s).map_err(|_| BadValiditySpecification(vld_span))?),
         },
         _ => {
-            bail!(BadValiditySpecification(vld_span))
+            bail!(BadValiditySpecification(vld_span));
         }
     }
 }

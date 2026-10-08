@@ -119,10 +119,10 @@ impl InputAtom {
                     span,
                 },
                 InputAtom::Unification { inner } => {
-                    bail!(UnsafeNegation(inner.span))
+                    bail!(UnsafeNegation(inner.span));
                 }
                 InputAtom::Search { inner } => {
-                    bail!(UnsafeNegation(inner.span))
+                    bail!(UnsafeNegation(inner.span));
                 }
             },
             InputAtom::Search { inner } => InputAtom::Search { inner },

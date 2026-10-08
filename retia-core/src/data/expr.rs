@@ -78,7 +78,7 @@ pub fn eval_bytecode_pred(
 ) -> Result<bool> {
     match eval_bytecode(bytecodes, bindings, stack)? {
         DataValue::Bool(b) => Ok(b),
-        v => bail!(PredicateTypeError(span, v)),
+        v => { bail!(PredicateTypeError(span, v)); },
     }
 }
 
@@ -103,7 +103,7 @@ pub fn eval_bytecode(
         match current_instruction {
             Bytecode::Binding { var, tuple_pos, .. } => match tuple_pos {
                 None => {
-                    bail!(UnboundVariableError(var.name.to_string(), var.span))
+                    bail!(UnboundVariableError(var.name.to_string(), var.span));
                 }
                 Some(i) => {
                     let val = bindings
@@ -406,7 +406,7 @@ impl Expr {
         self.partial_eval()?;
         match self {
             Expr::Const { val, .. } => Ok(val),
-            _ => bail!(NotConstError),
+            _ => { bail!(NotConstError); },
         }
     }
     pub(crate) fn partial_eval(&mut self) -> Result<()> {
@@ -477,7 +477,7 @@ impl Expr {
         match self {
             Expr::Binding { var, tuple_pos, .. } => match tuple_pos {
                 None => {
-                    bail!(UnboundVariableError(var.name.to_string(), var.span))
+                    bail!(UnboundVariableError(var.name.to_string(), var.span));
                 }
                 Some(i) => Ok(bindings
                     .as_ref()

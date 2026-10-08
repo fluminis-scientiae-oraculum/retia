@@ -124,7 +124,7 @@ impl TokenizerConfig {
                             "all" => cangjie::options::TokenizerOption::All,
                             "search" => cangjie::options::TokenizerOption::ForSearch { hmm },
                             "unicode" => cangjie::options::TokenizerOption::Unicode,
-                            _ => bail!("Unknown Cangjie kind: {}", s),
+                            _ => { bail!("Unknown Cangjie kind: {}", s); },
                         }
                     }
                 };
@@ -133,7 +133,7 @@ impl TokenizerConfig {
                     option,
                 })
             }
-            _ => bail!("Unknown tokenizer: {}", self.name),
+            _ => { bail!("Unknown tokenizer: {}", self.name); },
         })
     }
     pub(crate) fn construct_token_filter(&self) -> Result<BoxTokenFilter> {
@@ -167,7 +167,7 @@ impl TokenizerConfig {
                             );
                         }
                     }
-                    _ => bail!("First argument `compound_words_list` must be a list of strings"),
+                    _ => { bail!("First argument `compound_words_list` must be a list of strings"); },
                 }
                 SplitCompoundWords::from_dictionary(list_values)
                     .map_err(|e| miette!("Failed to load dictionary: {}", e))?
@@ -203,7 +203,7 @@ impl TokenizerConfig {
                     "swedish" => Language::Swedish,
                     "tamil" => Language::Tamil,
                     "turkish" => Language::Turkish,
-                    lang => bail!("Unsupported language: {}", lang),
+                    lang => { bail!("Unsupported language: {}", lang); },
                 };
                 Stemmer::new(language).into()
             }
@@ -227,10 +227,10 @@ impl TokenizerConfig {
                         }
                         StopWordFilter::new(stopwords).into()
                     }
-                    _ => bail!("Filter Stopwords requires language name or a list of stopwords"),
+                    _ => { bail!("Filter Stopwords requires language name or a list of stopwords"); },
                 }
             }
-            _ => bail!("Unknown token filter: {:?}", self.name),
+            _ => { bail!("Unknown token filter: {:?}", self.name); },
         })
     }
 }

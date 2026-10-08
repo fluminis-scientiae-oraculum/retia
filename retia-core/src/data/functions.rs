@@ -63,7 +63,7 @@ fn ensure_same_value_type(a: &DataValue, b: &DataValue) -> Result<()> {
             "comparison can only be done between the same datatypes, got {:?} and {:?}",
             a,
             b
-        )
+        );
     }
     Ok(())
 }
@@ -115,7 +115,7 @@ fn get_json_path_immutable<'a>(
                 pointer = val;
             }
             _ => {
-                bail!("json path does not exist")
+                bail!("json path does not exist");
             }
         }
     }
@@ -146,7 +146,7 @@ fn get_json_path<'a>(
                 pointer = val;
             }
             _ => {
-                bail!("json path does not exist")
+                bail!("json path does not exist");
             }
         }
     }
@@ -176,7 +176,7 @@ pub(crate) fn op_remove_json_path(args: &[DataValue]) -> Result<DataValue> {
             arr.remove(key);
         }
         _ => {
-            bail!("json path does not exist")
+            bail!("json path does not exist");
         }
     }
     Ok(DataValue::Json(JsonData(result)))
@@ -189,9 +189,9 @@ pub(crate) fn op_json_object(args: &[DataValue]) -> Result<DataValue> {
         "json_object requires an even number of arguments"
     );
     let mut obj = serde_json::Map::with_capacity(args.len() / 2);
-    for pair in args.chunks_exact(2) {
-        let key = val2str(&pair[0]);
-        let value = to_json(&pair[1]);
+    for [key, value] in args.as_chunks::<2>().0 {
+        let key = val2str(key);
+        let value = to_json(value);
         obj.insert(key.to_string(), value);
     }
     Ok(DataValue::Json(JsonData(Value::Object(obj))))
@@ -272,7 +272,7 @@ pub(crate) fn op_parse_json(args: &[DataValue]) -> Result<DataValue> {
             let value = serde_json::from_str(s).into_diagnostic()?;
             Ok(DataValue::Json(JsonData(value)))
         }
-        None => bail!("parse_json requires a string argument"),
+        None => { bail!("parse_json requires a string argument"); },
     }
 }
 
@@ -280,7 +280,7 @@ define_op!(OP_DUMP_JSON, 1, false);
 pub(crate) fn op_dump_json(args: &[DataValue]) -> Result<DataValue> {
     match &args[0] {
         DataValue::Json(j) => Ok(DataValue::Str(j.0.to_string().into())),
-        _ => bail!("dump_json requires a json argument"),
+        _ => { bail!("dump_json requires a json argument"); },
     }
 }
 
@@ -388,7 +388,7 @@ pub(crate) fn op_add(args: &[DataValue]) -> Result<DataValue> {
             DataValue::Num(Num::Int(i)) => i_accum += i,
             DataValue::Num(Num::Float(f)) => f_accum += f,
             DataValue::Vec(_) => return add_vecs(args),
-            _ => bail!("addition requires numbers"),
+            _ => { bail!("addition requires numbers"); },
         }
     }
     if f_accum == 0.0f64 {
@@ -446,7 +446,7 @@ fn add_vecs(args: &[DataValue]) -> Result<DataValue> {
                 Vector::F64(v) => Ok(DataValue::Vec(Vector::F64(v + f))),
             }
         }
-        _ => bail!("addition requires numbers"),
+        _ => { bail!("addition requires numbers"); },
     }
 }
 
@@ -457,7 +457,7 @@ pub(crate) fn op_max(args: &[DataValue]) -> Result<DataValue> {
         .try_fold(None, |accum, nxt| match (accum, nxt) {
             (None, d @ DataValue::Num(_)) => Ok(Some(d.clone())),
             (Some(DataValue::Num(a)), DataValue::Num(b)) => Ok(Some(DataValue::Num(a.max(*b)))),
-            _ => bail!("'max can only be applied to numbers'"),
+            _ => { bail!("'max can only be applied to numbers'"); },
         })?;
     match res {
         None => Ok(DataValue::Num(Num::Float(f64::NEG_INFINITY))),
@@ -472,7 +472,7 @@ pub(crate) fn op_min(args: &[DataValue]) -> Result<DataValue> {
         .try_fold(None, |accum, nxt| match (accum, nxt) {
             (None, d @ DataValue::Num(_)) => Ok(Some(d.clone())),
             (Some(DataValue::Num(a)), DataValue::Num(b)) => Ok(Some(DataValue::Num(a.min(*b)))),
-            _ => bail!("'min' can only be applied to numbers"),
+            _ => { bail!("'min' can only be applied to numbers"); },
         })?;
     match res {
         None => Ok(DataValue::Num(Num::Float(f64::INFINITY))),
@@ -537,7 +537,7 @@ pub(crate) fn op_sub(args: &[DataValue]) -> Result<DataValue> {
                 }
             }
         }
-        _ => bail!("subtraction requires numbers"),
+        _ => { bail!("subtraction requires numbers"); },
     })
 }
 
@@ -550,7 +550,7 @@ pub(crate) fn op_mul(args: &[DataValue]) -> Result<DataValue> {
             DataValue::Num(Num::Int(i)) => i_accum *= i,
             DataValue::Num(Num::Float(f)) => f_accum *= f,
             DataValue::Vec(_) => return mul_vecs(args),
-            _ => bail!("multiplication requires numbers"),
+            _ => { bail!("multiplication requires numbers"); },
         }
     }
     if f_accum == 1.0f64 {
@@ -608,7 +608,7 @@ fn mul_vecs(args: &[DataValue]) -> Result<DataValue> {
                 Vector::F64(v) => Ok(DataValue::Vec(Vector::F64(v * f))),
             }
         }
-        _ => bail!("addition requires numbers"),
+        _ => { bail!("addition requires numbers"); },
     }
 }
 
@@ -663,7 +663,7 @@ pub(crate) fn op_div(args: &[DataValue]) -> Result<DataValue> {
                 Vector::F64(v) => DataValue::Vec(Vector::F64(a / v)),
             }
         }
-        _ => bail!("division requires numbers"),
+        _ => { bail!("division requires numbers"); },
     })
 }
 
@@ -674,7 +674,7 @@ pub(crate) fn op_minus(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Num(Num::Float(f)) => DataValue::Num(Num::Float(-(*f))),
         DataValue::Vec(Vector::F64(v)) => DataValue::Vec(Vector::F64(0. - v)),
         DataValue::Vec(Vector::F32(v)) => DataValue::Vec(Vector::F32(0. - v)),
-        _ => bail!("minus can only be applied to numbers"),
+        _ => { bail!("minus can only be applied to numbers"); },
     })
 }
 
@@ -685,7 +685,7 @@ pub(crate) fn op_abs(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Num(Num::Float(f)) => DataValue::Num(Num::Float(f.abs())),
         DataValue::Vec(Vector::F64(v)) => DataValue::Vec(Vector::F64(v.mapv(|x| x.abs()))),
         DataValue::Vec(Vector::F32(v)) => DataValue::Vec(Vector::F32(v.mapv(|x| x.abs()))),
-        _ => bail!("'abs' requires numbers"),
+        _ => { bail!("'abs' requires numbers"); },
     })
 }
 
@@ -704,7 +704,7 @@ pub(crate) fn op_signum(args: &[DataValue]) -> Result<DataValue> {
                 DataValue::from(f64::NAN)
             }
         }
-        _ => bail!("'signum' requires numbers"),
+        _ => { bail!("'signum' requires numbers"); },
     })
 }
 
@@ -713,7 +713,7 @@ pub(crate) fn op_floor(args: &[DataValue]) -> Result<DataValue> {
     Ok(match &args[0] {
         DataValue::Num(Num::Int(i)) => DataValue::Num(Num::Int(*i)),
         DataValue::Num(Num::Float(f)) => DataValue::Num(Num::Float(f.floor())),
-        _ => bail!("'floor' requires numbers"),
+        _ => { bail!("'floor' requires numbers"); },
     })
 }
 
@@ -722,7 +722,7 @@ pub(crate) fn op_ceil(args: &[DataValue]) -> Result<DataValue> {
     Ok(match &args[0] {
         DataValue::Num(Num::Int(i)) => DataValue::Num(Num::Int(*i)),
         DataValue::Num(Num::Float(f)) => DataValue::Num(Num::Float(f.ceil())),
-        _ => bail!("'ceil' requires numbers"),
+        _ => { bail!("'ceil' requires numbers"); },
     })
 }
 
@@ -731,7 +731,7 @@ pub(crate) fn op_round(args: &[DataValue]) -> Result<DataValue> {
     Ok(match &args[0] {
         DataValue::Num(Num::Int(i)) => DataValue::Num(Num::Int(*i)),
         DataValue::Num(Num::Float(f)) => DataValue::Num(Num::Float(f.round())),
-        _ => bail!("'round' requires numbers"),
+        _ => { bail!("'round' requires numbers"); },
     })
 }
 
@@ -746,7 +746,7 @@ pub(crate) fn op_exp(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.exp()))));
         }
-        _ => bail!("'exp' requires numbers"),
+        _ => { bail!("'exp' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.exp())))
 }
@@ -762,7 +762,7 @@ pub(crate) fn op_exp2(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.exp2()))));
         }
-        _ => bail!("'exp2' requires numbers"),
+        _ => { bail!("'exp2' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.exp2())))
 }
@@ -778,7 +778,7 @@ pub(crate) fn op_ln(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.ln()))));
         }
-        _ => bail!("'ln' requires numbers"),
+        _ => { bail!("'ln' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.ln())))
 }
@@ -794,7 +794,7 @@ pub(crate) fn op_log2(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.log2()))));
         }
-        _ => bail!("'log2' requires numbers"),
+        _ => { bail!("'log2' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.log2())))
 }
@@ -810,7 +810,7 @@ pub(crate) fn op_log10(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.log10()))));
         }
-        _ => bail!("'log10' requires numbers"),
+        _ => { bail!("'log10' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.log10())))
 }
@@ -826,7 +826,7 @@ pub(crate) fn op_sin(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.sin()))));
         }
-        _ => bail!("'sin' requires numbers"),
+        _ => { bail!("'sin' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.sin())))
 }
@@ -842,7 +842,7 @@ pub(crate) fn op_cos(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.cos()))));
         }
-        _ => bail!("'cos' requires numbers"),
+        _ => { bail!("'cos' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.cos())))
 }
@@ -858,7 +858,7 @@ pub(crate) fn op_tan(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.tan()))));
         }
-        _ => bail!("'tan' requires numbers"),
+        _ => { bail!("'tan' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.tan())))
 }
@@ -874,7 +874,7 @@ pub(crate) fn op_asin(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.asin()))));
         }
-        _ => bail!("'asin' requires numbers"),
+        _ => { bail!("'asin' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.asin())))
 }
@@ -890,7 +890,7 @@ pub(crate) fn op_acos(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.acos()))));
         }
-        _ => bail!("'acos' requires numbers"),
+        _ => { bail!("'acos' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.acos())))
 }
@@ -906,7 +906,7 @@ pub(crate) fn op_atan(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.atan()))));
         }
-        _ => bail!("'atan' requires numbers"),
+        _ => { bail!("'atan' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.atan())))
 }
@@ -916,12 +916,12 @@ pub(crate) fn op_atan2(args: &[DataValue]) -> Result<DataValue> {
     let a = match &args[0] {
         DataValue::Num(Num::Int(i)) => *i as f64,
         DataValue::Num(Num::Float(f)) => *f,
-        _ => bail!("'atan2' requires numbers"),
+        _ => { bail!("'atan2' requires numbers"); },
     };
     let b = match &args[1] {
         DataValue::Num(Num::Int(i)) => *i as f64,
         DataValue::Num(Num::Float(f)) => *f,
-        _ => bail!("'atan2' requires numbers"),
+        _ => { bail!("'atan2' requires numbers"); },
     };
 
     Ok(DataValue::Num(Num::Float(a.atan2(b))))
@@ -938,7 +938,7 @@ pub(crate) fn op_sinh(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.sinh()))));
         }
-        _ => bail!("'sinh' requires numbers"),
+        _ => { bail!("'sinh' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.sinh())))
 }
@@ -954,7 +954,7 @@ pub(crate) fn op_cosh(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.cosh()))));
         }
-        _ => bail!("'cosh' requires numbers"),
+        _ => { bail!("'cosh' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.cosh())))
 }
@@ -970,7 +970,7 @@ pub(crate) fn op_tanh(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.tanh()))));
         }
-        _ => bail!("'tanh' requires numbers"),
+        _ => { bail!("'tanh' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.tanh())))
 }
@@ -986,7 +986,7 @@ pub(crate) fn op_asinh(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.asinh()))));
         }
-        _ => bail!("'asinh' requires numbers"),
+        _ => { bail!("'asinh' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.asinh())))
 }
@@ -1002,7 +1002,7 @@ pub(crate) fn op_acosh(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.acosh()))));
         }
-        _ => bail!("'acosh' requires numbers"),
+        _ => { bail!("'acosh' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.acosh())))
 }
@@ -1018,7 +1018,7 @@ pub(crate) fn op_atanh(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.atanh()))));
         }
-        _ => bail!("'atanh' requires numbers"),
+        _ => { bail!("'atanh' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.atanh())))
 }
@@ -1034,7 +1034,7 @@ pub(crate) fn op_sqrt(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Vec(Vector::F64(v)) => {
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.sqrt()))));
         }
-        _ => bail!("'sqrt' requires numbers"),
+        _ => { bail!("'sqrt' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.sqrt())))
 }
@@ -1056,12 +1056,12 @@ pub(crate) fn op_pow(args: &[DataValue]) -> Result<DataValue> {
                 .ok_or_else(|| miette!("'pow' requires numbers"))?;
             return Ok(DataValue::Vec(Vector::F64(v.mapv(|x| x.powf(b)))));
         }
-        _ => bail!("'pow' requires numbers"),
+        _ => { bail!("'pow' requires numbers"); },
     };
     let b = match &args[1] {
         DataValue::Num(Num::Int(i)) => *i as f64,
         DataValue::Num(Num::Float(f)) => *f,
-        _ => bail!("'pow' requires numbers"),
+        _ => { bail!("'pow' requires numbers"); },
     };
     Ok(DataValue::Num(Num::Float(a.powf(b))))
 }
@@ -1071,7 +1071,7 @@ pub(crate) fn op_mod(args: &[DataValue]) -> Result<DataValue> {
     Ok(match (&args[0], &args[1]) {
         (DataValue::Num(Num::Int(a)), DataValue::Num(Num::Int(b))) => {
             if *b == 0 {
-                bail!("'mod' requires non-zero divisor")
+                bail!("'mod' requires non-zero divisor");
             }
             DataValue::Num(Num::Int(a.rem(b)))
         }
@@ -1084,7 +1084,7 @@ pub(crate) fn op_mod(args: &[DataValue]) -> Result<DataValue> {
         (DataValue::Num(Num::Float(a)), DataValue::Num(Num::Int(b))) => {
             DataValue::Num(Num::Float(a.rem(*b as f64)))
         }
-        _ => bail!("'mod' requires numbers"),
+        _ => { bail!("'mod' requires numbers"); },
     })
 }
 
@@ -1137,7 +1137,7 @@ pub(crate) fn op_bit_and(args: &[DataValue]) -> Result<DataValue> {
             }
             Ok(DataValue::Bytes(ret))
         }
-        _ => bail!("'bit_and' requires bytes"),
+        _ => { bail!("'bit_and' requires bytes"); },
     }
 }
 
@@ -1155,7 +1155,7 @@ pub(crate) fn op_bit_or(args: &[DataValue]) -> Result<DataValue> {
             }
             Ok(DataValue::Bytes(ret))
         }
-        _ => bail!("'bit_or' requires bytes"),
+        _ => { bail!("'bit_or' requires bytes"); },
     }
 }
 
@@ -1169,7 +1169,7 @@ pub(crate) fn op_bit_not(args: &[DataValue]) -> Result<DataValue> {
             }
             Ok(DataValue::Bytes(ret))
         }
-        _ => bail!("'bit_not' requires bytes"),
+        _ => { bail!("'bit_not' requires bytes"); },
     }
 }
 
@@ -1187,7 +1187,7 @@ pub(crate) fn op_bit_xor(args: &[DataValue]) -> Result<DataValue> {
             }
             Ok(DataValue::Bytes(ret))
         }
-        _ => bail!("'bit_xor' requires bytes"),
+        _ => { bail!("'bit_xor' requires bytes"); },
     }
 }
 
@@ -1209,7 +1209,7 @@ pub(crate) fn op_unpack_bits(args: &[DataValue]) -> Result<DataValue> {
             ret.into_iter().map(DataValue::Bool).collect_vec(),
         ))
     } else {
-        bail!("'unpack_bits' requires bytes")
+        bail!("'unpack_bits' requires bytes");
     }
 }
 
@@ -1238,7 +1238,7 @@ pub(crate) fn op_pack_bits(args: &[DataValue]) -> Result<DataValue> {
                         }
                     }
                 }
-                _ => bail!("'pack_bits' requires list of booleans"),
+                _ => { bail!("'pack_bits' requires list of booleans"); },
             }
         }
         Ok(DataValue::Bytes(res))
@@ -1246,7 +1246,7 @@ pub(crate) fn op_pack_bits(args: &[DataValue]) -> Result<DataValue> {
         let l = v.iter().cloned().collect_vec();
         op_pack_bits(&[DataValue::List(l)])
     } else {
-        bail!("'pack_bits' requires list of booleans")
+        bail!("'pack_bits' requires list of booleans");
     }
 }
 
@@ -1288,7 +1288,7 @@ pub(crate) fn op_concat(args: &[DataValue]) -> Result<DataValue> {
             }
             Ok(DataValue::Json(JsonData(ret)))
         }
-        _ => bail!("'concat' requires strings, lists, or JSON objects"),
+        _ => { bail!("'concat' requires strings, lists, or JSON objects"); },
     }
 }
 
@@ -1313,7 +1313,7 @@ define_op!(OP_STR_INCLUDES, 2, false);
 pub(crate) fn op_str_includes(args: &[DataValue]) -> Result<DataValue> {
     match (&args[0], &args[1]) {
         (DataValue::Str(l), DataValue::Str(r)) => Ok(DataValue::from(l.find(r as &str).is_some())),
-        _ => bail!("'str_includes' requires strings"),
+        _ => { bail!("'str_includes' requires strings"); },
     }
 }
 
@@ -1321,7 +1321,7 @@ define_op!(OP_LOWERCASE, 1, false);
 pub(crate) fn op_lowercase(args: &[DataValue]) -> Result<DataValue> {
     match &args[0] {
         DataValue::Str(s) => Ok(DataValue::from(s.to_lowercase())),
-        _ => bail!("'lowercase' requires strings"),
+        _ => { bail!("'lowercase' requires strings"); },
     }
 }
 
@@ -1329,7 +1329,7 @@ define_op!(OP_UPPERCASE, 1, false);
 pub(crate) fn op_uppercase(args: &[DataValue]) -> Result<DataValue> {
     match &args[0] {
         DataValue::Str(s) => Ok(DataValue::from(s.to_uppercase())),
-        _ => bail!("'uppercase' requires strings"),
+        _ => { bail!("'uppercase' requires strings"); },
     }
 }
 
@@ -1337,7 +1337,7 @@ define_op!(OP_TRIM, 1, false);
 pub(crate) fn op_trim(args: &[DataValue]) -> Result<DataValue> {
     match &args[0] {
         DataValue::Str(s) => Ok(DataValue::from(s.trim())),
-        _ => bail!("'trim' requires strings"),
+        _ => { bail!("'trim' requires strings"); },
     }
 }
 
@@ -1345,7 +1345,7 @@ define_op!(OP_TRIM_START, 1, false);
 pub(crate) fn op_trim_start(args: &[DataValue]) -> Result<DataValue> {
     match &args[0] {
         DataValue::Str(s) => Ok(DataValue::from(s.trim_start())),
-        v => bail!("'trim_start' requires strings, got {}", v),
+        v => { bail!("'trim_start' requires strings, got {}", v); },
     }
 }
 
@@ -1353,7 +1353,7 @@ define_op!(OP_TRIM_END, 1, false);
 pub(crate) fn op_trim_end(args: &[DataValue]) -> Result<DataValue> {
     match &args[0] {
         DataValue::Str(s) => Ok(DataValue::from(s.trim_end())),
-        _ => bail!("'trim_end' requires strings"),
+        _ => { bail!("'trim_end' requires strings"); },
     }
 }
 
@@ -1364,7 +1364,7 @@ pub(crate) fn op_starts_with(args: &[DataValue]) -> Result<DataValue> {
         (DataValue::Bytes(l), DataValue::Bytes(r)) => {
             Ok(DataValue::from(l.starts_with(r as &[u8])))
         }
-        _ => bail!("'starts_with' requires strings or bytes"),
+        _ => { bail!("'starts_with' requires strings or bytes"); },
     }
 }
 
@@ -1373,7 +1373,7 @@ pub(crate) fn op_ends_with(args: &[DataValue]) -> Result<DataValue> {
     match (&args[0], &args[1]) {
         (DataValue::Str(l), DataValue::Str(r)) => Ok(DataValue::from(l.ends_with(r as &str))),
         (DataValue::Bytes(l), DataValue::Bytes(r)) => Ok(DataValue::from(l.ends_with(r as &[u8]))),
-        _ => bail!("'ends_with' requires strings or bytes"),
+        _ => { bail!("'ends_with' requires strings or bytes"); },
     }
 }
 
@@ -1386,7 +1386,7 @@ pub(crate) fn op_regex(args: &[DataValue]) -> Result<DataValue> {
                 miette!("The string cannot be interpreted as regex: {}", err)
             })?))
         }
-        _ => bail!("'regex' requires strings"),
+        _ => { bail!("'regex' requires strings"); },
     })
 }
 
@@ -1394,7 +1394,7 @@ define_op!(OP_REGEX_MATCHES, 2, false);
 pub(crate) fn op_regex_matches(args: &[DataValue]) -> Result<DataValue> {
     match (&args[0], &args[1]) {
         (DataValue::Str(s), DataValue::Regex(r)) => Ok(DataValue::from(r.0.is_match(s))),
-        _ => bail!("'regex_matches' requires strings"),
+        _ => { bail!("'regex_matches' requires strings"); },
     }
 }
 
@@ -1404,7 +1404,7 @@ pub(crate) fn op_regex_replace(args: &[DataValue]) -> Result<DataValue> {
         (DataValue::Str(s), DataValue::Regex(r), DataValue::Str(rp)) => {
             Ok(DataValue::Str(r.0.replace(s, rp as &str).into()))
         }
-        _ => bail!("'regex_replace' requires strings"),
+        _ => { bail!("'regex_replace' requires strings"); },
     }
 }
 
@@ -1414,7 +1414,7 @@ pub(crate) fn op_regex_replace_all(args: &[DataValue]) -> Result<DataValue> {
         (DataValue::Str(s), DataValue::Regex(r), DataValue::Str(rp)) => {
             Ok(DataValue::Str(r.0.replace_all(s, rp as &str).into()))
         }
-        _ => bail!("'regex_replace' requires strings"),
+        _ => { bail!("'regex_replace' requires strings"); },
     }
 }
 
@@ -1428,7 +1428,7 @@ pub(crate) fn op_regex_extract(args: &[DataValue]) -> Result<DataValue> {
                     .collect_vec();
             Ok(DataValue::List(found))
         }
-        _ => bail!("'regex_extract' requires strings"),
+        _ => { bail!("'regex_extract' requires strings"); },
     }
 }
 
@@ -1439,7 +1439,7 @@ pub(crate) fn op_regex_extract_first(args: &[DataValue]) -> Result<DataValue> {
             let found = r.0.find(s).map(|v| DataValue::from(v.as_str()));
             Ok(found.unwrap_or(DataValue::Null))
         }
-        _ => bail!("'regex_extract_first' requires strings"),
+        _ => { bail!("'regex_extract_first' requires strings"); },
     }
 }
 
@@ -1536,7 +1536,7 @@ pub(crate) fn op_append(args: &[DataValue]) -> Result<DataValue> {
             l.push(args[1].clone());
             Ok(DataValue::List(l))
         }
-        _ => bail!("'append' requires first argument to be a list"),
+        _ => { bail!("'append' requires first argument to be a list"); },
     }
 }
 
@@ -1553,7 +1553,7 @@ pub(crate) fn op_prepend(args: &[DataValue]) -> Result<DataValue> {
             l.extend(pl.iter().cloned());
             Ok(DataValue::List(l))
         }
-        _ => bail!("'prepend' requires first argument to be a list"),
+        _ => { bail!("'prepend' requires first argument to be a list"); },
     }
 }
 
@@ -1570,7 +1570,7 @@ pub(crate) fn op_length(args: &[DataValue]) -> Result<DataValue> {
         DataValue::Str(s) => s.chars().count() as i64,
         DataValue::Bytes(b) => b.len() as i64,
         DataValue::Vec(v) => v.len() as i64,
-        _ => bail!("'length' requires lists"),
+        _ => { bail!("'length' requires lists"); },
     }))
 }
 
@@ -1582,9 +1582,9 @@ pub(crate) fn op_unicode_normalize(args: &[DataValue]) -> Result<DataValue> {
             "nfd" => s.nfd().collect(),
             "nfkc" => s.nfkc().collect(),
             "nfkd" => s.nfkd().collect(),
-            u => bail!("unknown normalization {} for 'unicode_normalize'", u),
+            u => { bail!("unknown normalization {} for 'unicode_normalize'", u); },
         })),
-        _ => bail!("'unicode_normalize' requires strings"),
+        _ => { bail!("'unicode_normalize' requires strings"); },
     }
 }
 
@@ -1729,12 +1729,12 @@ fn get_index(mut i: i64, total: usize, is_upper: bool) -> Result<usize> {
     Ok(if i >= 0 {
         let i = i as usize;
         if i > total || (!is_upper && i == total) {
-            bail!("index {} out of bound", i)
+            bail!("index {} out of bound", i);
         } else {
             i
         }
     } else {
-        bail!("index {} out of bound", i)
+        bail!("index {} out of bound", i);
     })
 }
 
@@ -1776,12 +1776,12 @@ fn get_impl(args: &[DataValue]) -> Result<DataValue> {
                         .clone()
                 }
                 DataValue::List(l) => get_json_path_immutable(json, l)?.clone(),
-                _ => bail!("second argument to 'get' mut be a string or integer"),
+                _ => { bail!("second argument to 'get' mut be a string or integer"); },
             };
             let res = json2val(res);
             Ok(res)
         }
-        _ => bail!("first argument to 'get' mut be a list or json"),
+        _ => { bail!("first argument to 'get' mut be a list or json"); },
     }
 }
 
@@ -1874,7 +1874,7 @@ pub(crate) fn op_from_substrings(args: &[DataValue]) -> Result<DataValue> {
                 if let DataValue::Str(s) = arg {
                     ret.push_str(s);
                 } else {
-                    bail!("'from_substring' requires a list of strings")
+                    bail!("'from_substring' requires a list of strings");
                 }
             }
         }
@@ -1883,11 +1883,11 @@ pub(crate) fn op_from_substrings(args: &[DataValue]) -> Result<DataValue> {
                 if let DataValue::Str(s) = arg {
                     ret.push_str(s);
                 } else {
-                    bail!("'from_substring' requires a list of strings")
+                    bail!("'from_substring' requires a list of strings");
                 }
             }
         }
-        _ => bail!("'from_substring' requires a list of strings"),
+        _ => { bail!("'from_substring' requires a list of strings"); },
     }
     Ok(DataValue::from(ret))
 }
@@ -1899,7 +1899,7 @@ pub(crate) fn op_encode_base64(args: &[DataValue]) -> Result<DataValue> {
             let s = STANDARD.encode(b);
             Ok(DataValue::from(s))
         }
-        _ => bail!("'encode_base64' requires bytes"),
+        _ => { bail!("'encode_base64' requires bytes"); },
     }
 }
 
@@ -1912,7 +1912,7 @@ pub(crate) fn op_decode_base64(args: &[DataValue]) -> Result<DataValue> {
                 .map_err(|_| miette!("Data is not properly encoded"))?;
             Ok(DataValue::Bytes(b))
         }
-        _ => bail!("'decode_base64' requires strings"),
+        _ => { bail!("'decode_base64' requires strings"); },
     }
 }
 
@@ -1987,7 +1987,7 @@ pub(crate) fn op_to_int(args: &[DataValue]) -> Result<DataValue> {
                 .into()
         }
         DataValue::Validity(vld) => DataValue::Num(Num::Int(vld.timestamp.0 .0)),
-        v => bail!("'to_int' does not recognize {:?}", v),
+        v => { bail!("'to_int' does not recognize {:?}", v); },
     })
 }
 
@@ -2007,7 +2007,7 @@ pub(crate) fn op_to_float(args: &[DataValue]) -> Result<DataValue> {
                 .map_err(|_| miette!("The string cannot be interpreted as float"))?
                 .into(),
         },
-        v => bail!("'to_float' does not recognize {:?}", v),
+        v => { bail!("'to_float' does not recognize {:?}", v); },
     })
 }
 
@@ -2033,10 +2033,10 @@ pub(crate) fn op_vec(args: &[DataValue]) -> Result<DataValue> {
         Some(DataValue::Str(s)) => match s as &str {
             "F32" | "Float" => VecElementType::F32,
             "F64" | "Double" => VecElementType::F64,
-            _ => bail!("'vec' does not recognize type {}", s),
+            _ => { bail!("'vec' does not recognize type {}", s); },
         },
         None => VecElementType::F32,
-        _ => bail!("'vec' requires a string as second argument"),
+        _ => { bail!("'vec' requires a string as second argument"); },
     };
 
     match &args[0] {
@@ -2127,7 +2127,7 @@ pub(crate) fn op_vec(args: &[DataValue]) -> Result<DataValue> {
                 }
             }
         }
-        _ => bail!("'vec' requires a list or a vector"),
+        _ => { bail!("'vec' requires a list or a vector"); },
     }
 }
 
@@ -2140,10 +2140,10 @@ pub(crate) fn op_rand_vec(args: &[DataValue]) -> Result<DataValue> {
         Some(DataValue::Str(s)) => match s as &str {
             "F32" | "Float" => VecElementType::F32,
             "F64" | "Double" => VecElementType::F64,
-            _ => bail!("'vec' does not recognize type {}", s),
+            _ => { bail!("'vec' does not recognize type {}", s); },
         },
         None => VecElementType::F32,
-        _ => bail!("'vec' requires a string as second argument"),
+        _ => { bail!("'vec' requires a string as second argument"); },
     };
 
     let mut rng = rand::rng();
@@ -2177,7 +2177,7 @@ pub(crate) fn op_l2_normalize(args: &[DataValue]) -> Result<DataValue> {
             let norm = a.dot(a).sqrt();
             Ok(DataValue::Vec(Vector::F64(a / norm)))
         }
-        _ => bail!("'l2_normalize' requires a vector"),
+        _ => { bail!("'l2_normalize' requires a vector"); },
     }
 }
 
@@ -2200,7 +2200,7 @@ pub(crate) fn op_l2_dist(args: &[DataValue]) -> Result<DataValue> {
             let diff = a - b;
             Ok(DataValue::from(diff.dot(&diff)))
         }
-        _ => bail!("'l2_dist' requires two vectors of the same type"),
+        _ => { bail!("'l2_dist' requires two vectors of the same type"); },
     }
 }
 
@@ -2223,7 +2223,7 @@ pub(crate) fn op_ip_dist(args: &[DataValue]) -> Result<DataValue> {
             let dot = a.dot(b);
             Ok(DataValue::from(1. - dot))
         }
-        _ => bail!("'ip_dist' requires two vectors of the same type"),
+        _ => { bail!("'ip_dist' requires two vectors of the same type"); },
     }
 }
 
@@ -2250,7 +2250,7 @@ pub(crate) fn op_cos_dist(args: &[DataValue]) -> Result<DataValue> {
             let dot = a.dot(b);
             Ok(DataValue::from(1. - dot / (a_norm * b_norm).sqrt()))
         }
-        _ => bail!("'cos_dist' requires two vectors of the same type"),
+        _ => { bail!("'cos_dist' requires two vectors of the same type"); },
     }
 }
 
@@ -2297,7 +2297,7 @@ pub(crate) fn op_int_range(args: &[DataValue]) -> Result<DataValue> {
             }
             return Ok(DataValue::List(result));
         }
-        _ => bail!("'int_range' requires 1 to 3 argument"),
+        _ => { bail!("'int_range' requires 1 to 3 argument"); },
     };
     Ok(DataValue::List((start..end).map(DataValue::from).collect()))
 }
@@ -2318,7 +2318,7 @@ pub(crate) fn op_rand_bernoulli(args: &[DataValue]) -> Result<DataValue> {
             );
             f
         }
-        _ => bail!("'rand_bernoulli' requires number between 0. and 1."),
+        _ => { bail!("'rand_bernoulli' requires number between 0. and 1."); },
     };
     Ok(DataValue::from(rand::rng().random_bool(prob)))
 }
@@ -2348,7 +2348,7 @@ pub(crate) fn op_rand_choose(args: &[DataValue]) -> Result<DataValue> {
             .cloned()
             .cloned()
             .unwrap_or(DataValue::Null)),
-        _ => bail!("'rand_choice' requires lists"),
+        _ => { bail!("'rand_choice' requires lists"); },
     }
 }
 
@@ -2356,7 +2356,7 @@ define_op!(OP_ASSERT, 1, true);
 pub(crate) fn op_assert(args: &[DataValue]) -> Result<DataValue> {
     match &args[0] {
         DataValue::Bool(true) => Ok(DataValue::from(true)),
-        _ => bail!("assertion failed: {:?}", args),
+        _ => { bail!("assertion failed: {:?}", args); },
     }
 }
 
@@ -2375,7 +2375,7 @@ pub(crate) fn op_union(args: &[DataValue]) -> Result<DataValue> {
                     ret.insert(el.clone());
                 }
             }
-            _ => bail!("'union' requires lists"),
+            _ => { bail!("'union' requires lists"); },
         }
     }
     Ok(DataValue::List(ret.into_iter().collect()))
@@ -2386,7 +2386,7 @@ pub(crate) fn op_difference(args: &[DataValue]) -> Result<DataValue> {
     let mut start: BTreeSet<_> = match &args[0] {
         DataValue::List(l) => l.iter().cloned().collect(),
         DataValue::Set(s) => s.iter().cloned().collect(),
-        _ => bail!("'difference' requires lists"),
+        _ => { bail!("'difference' requires lists"); },
     };
     for arg in &args[1..] {
         match arg {
@@ -2400,7 +2400,7 @@ pub(crate) fn op_difference(args: &[DataValue]) -> Result<DataValue> {
                     start.remove(el);
                 }
             }
-            _ => bail!("'difference' requires lists"),
+            _ => { bail!("'difference' requires lists"); },
         }
     }
     Ok(DataValue::List(start.into_iter().collect()))
@@ -2411,7 +2411,7 @@ pub(crate) fn op_intersection(args: &[DataValue]) -> Result<DataValue> {
     let mut start: BTreeSet<_> = match &args[0] {
         DataValue::List(l) => l.iter().cloned().collect(),
         DataValue::Set(s) => s.iter().cloned().collect(),
-        _ => bail!("'intersection' requires lists"),
+        _ => { bail!("'intersection' requires lists"); },
     };
     for arg in &args[1..] {
         match arg {
@@ -2420,7 +2420,7 @@ pub(crate) fn op_intersection(args: &[DataValue]) -> Result<DataValue> {
                 start = start.intersection(&other).cloned().collect();
             }
             DataValue::Set(s) => start = start.intersection(s).cloned().collect(),
-            _ => bail!("'intersection' requires lists"),
+            _ => { bail!("'intersection' requires lists"); },
         }
     }
     Ok(DataValue::List(start.into_iter().collect()))
@@ -2434,7 +2434,7 @@ pub(crate) fn op_to_uuid(args: &[DataValue]) -> Result<DataValue> {
             let id = uuid::Uuid::try_parse(s).map_err(|_| miette!("invalid UUID"))?;
             Ok(DataValue::uuid(id))
         }
-        _ => bail!("'to_uuid' requires a string"),
+        _ => { bail!("'to_uuid' requires a string"); },
     }
 }
 
@@ -2575,7 +2575,7 @@ pub(crate) fn op_uuid_timestamp(args: &[DataValue]) -> Result<DataValue> {
                 s.into()
             }
         },
-        _ => bail!("not an UUID"),
+        _ => { bail!("not an UUID"); },
     })
 }
 

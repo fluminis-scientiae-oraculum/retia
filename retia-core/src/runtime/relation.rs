@@ -558,7 +558,7 @@ impl<'a> SessionTx<'a> {
         replaces: &[String],
     ) -> Result<()> {
         if name.name.starts_with('_') {
-            bail!("Cannot set triggers for temp store")
+            bail!("Cannot set triggers for temp store");
         }
         let mut original = self.get_relation(name, true)?;
         if original.access_level < AccessLevel::Protected {
@@ -566,7 +566,7 @@ impl<'a> SessionTx<'a> {
                 original.name.to_string(),
                 "set triggers".to_string(),
                 original.access_level
-            ))
+            ));
         }
         original.put_triggers = puts.to_vec();
         original.rm_triggers = rms.to_vec();
@@ -594,10 +594,10 @@ impl<'a> SessionTx<'a> {
 
         if is_temp {
             if self.store_tx.exists(&encoded, true)? {
-                bail!(RelNameConflictError(input_meta.name.to_string()))
+                bail!(RelNameConflictError(input_meta.name.to_string()));
             };
         } else if self.temp_store_tx.exists(&encoded, true)? {
-            bail!(RelNameConflictError(input_meta.name.to_string()))
+            bail!(RelNameConflictError(input_meta.name.to_string()));
         }
 
         let metadata = input_meta.metadata.clone();
@@ -697,7 +697,7 @@ impl<'a> SessionTx<'a> {
                 store.name.to_string(),
                 "relation removal".to_string(),
                 store.access_level
-            ))
+            ));
         }
 
         for k in store.indices.keys() {
@@ -1047,7 +1047,7 @@ impl<'a> SessionTx<'a> {
                             bail!("Cannot create HNSW index with field {} of dimension {} (expected {})", field, len, config.vec_dim);
                         }
                     } else {
-                        bail!("Cannot create HNSW index with non-vector field {}", field)
+                        bail!("Cannot create HNSW index with non-vector field {}", field);
                     }
 
                     found = true;
@@ -1417,7 +1417,7 @@ impl<'a> SessionTx<'a> {
         let new_encoded = vec![new_key].encode_as_key(RelationId::SYSTEM);
 
         if self.store_tx.exists(&new_encoded, true)? {
-            bail!(RelNameConflictError(new.name.to_string()))
+            bail!(RelNameConflictError(new.name.to_string()));
         };
 
         let old_key = DataValue::Str(old.name.clone());
@@ -1445,7 +1445,7 @@ impl<'a> SessionTx<'a> {
         let new_encoded = vec![new_key].encode_as_key(RelationId::SYSTEM);
 
         if self.temp_store_tx.exists(&new_encoded, true)? {
-            bail!(RelNameConflictError(new.name.to_string()))
+            bail!(RelNameConflictError(new.name.to_string()));
         };
 
         let old_key = DataValue::Str(old.name.clone());

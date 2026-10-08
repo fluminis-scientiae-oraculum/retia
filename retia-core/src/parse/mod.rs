@@ -216,7 +216,7 @@ impl RetiaScript {
         match self {
             RetiaScript::Single(s) => Ok(s),
             RetiaScript::Imperative(_) | RetiaScript::Sys(_) => {
-                bail!(ExpectSingleProgram)
+                bail!(ExpectSingleProgram);
             }
         }
     }

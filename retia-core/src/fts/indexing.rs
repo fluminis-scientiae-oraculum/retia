@@ -314,7 +314,7 @@ impl<'a> SessionTx<'a> {
                 #[diagnostic(code(eval::fts::extractor::invalid_return_type))]
                 struct FtsExtractError(String);
 
-                bail!(FtsExtractError(format!("{}", val)))
+                bail!(FtsExtractError(format!("{}", val)));
             }
         };
         let mut token_stream = tokenizer.token_stream(&to_index);
@@ -368,7 +368,7 @@ impl<'a> SessionTx<'a> {
                 #[diagnostic(code(eval::fts::extractor::invalid_return_type))]
                 struct FtsExtractError(String);
 
-                bail!(FtsExtractError(format!("{}", val)))
+                bail!(FtsExtractError(format!("{}", val)));
             }
         };
         let mut token_stream = tokenizer.token_stream(&to_index);

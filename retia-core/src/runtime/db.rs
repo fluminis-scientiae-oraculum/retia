@@ -527,7 +527,7 @@ impl<'s, S: Storage<'s>> Db<S> {
                 }
             };
             if relation.contains(':') {
-                bail!(ImportIntoIndex(relation.to_string()))
+                bail!(ImportIntoIndex(relation.to_string()));
             }
             let handle = tx.get_relation(relation, false)?;
             let has_indices = !handle.indices.is_empty();
@@ -712,7 +712,7 @@ impl<'s, S: Storage<'s>> Db<S> {
 
             for relation in relations {
                 if relation.contains(':') {
-                    bail!(ImportIntoIndex(relation.to_string()))
+                    bail!(ImportIntoIndex(relation.to_string()));
                 }
                 let src_handle = src_tx.get_relation(relation, false)?;
                 let dst_handle = dst_tx.get_relation(relation, false)?;
@@ -724,7 +724,7 @@ impl<'s, S: Storage<'s>> Db<S> {
                     #[diagnostic(help("Use `import_relations()` instead"))]
                     pub(crate) struct RestoreIntoRelWithIndices(pub(crate) String);
 
-                    bail!(RestoreIntoRelWithIndices(dst_handle.name.to_string()))
+                    bail!(RestoreIntoRelWithIndices(dst_handle.name.to_string()));
                 }
 
                 if dst_handle.access_level < AccessLevel::Protected {
@@ -770,7 +770,7 @@ impl<'s, S: Storage<'s>> Db<S> {
                 bail!(
                     "A fixed rule with the name {} is already registered",
                     ent.key()
-                )
+                );
             }
         }
     }
@@ -1558,7 +1558,7 @@ impl<'s, S: Storage<'s>> Db<S> {
                         )]
                         #[diagnostic(code(eval::assert_none_failure))]
                         struct AssertNoneFailure(Tuple, #[label] SourceSpan);
-                        bail!(AssertNoneFailure(tuple.into_tuple(), *span))
+                        bail!(AssertNoneFailure(tuple.into_tuple(), *span));
                     }
                 }
                 QueryAssertion::AssertSome(span) => {
@@ -1567,7 +1567,7 @@ impl<'s, S: Storage<'s>> Db<S> {
                         #[error("The query is asserted to return some results, but returned none")]
                         #[diagnostic(code(eval::assert_some_failure))]
                         struct AssertSomeFailure(#[label] SourceSpan);
-                        bail!(AssertSomeFailure(*span))
+                        bail!(AssertSomeFailure(*span));
                     }
                 }
             }
@@ -1936,7 +1936,7 @@ impl Poison {
         struct ProcessKilled;
 
         if self.0.load(Ordering::Relaxed) {
-            bail!(ProcessKilled)
+            bail!(ProcessKilled);
         }
         Ok(())
     }

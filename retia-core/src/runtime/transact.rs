@@ -111,7 +111,7 @@ impl<'a> SessionTx<'a> {
                 let version_found = self.store_tx.get(&storage_version_key, false)?;
                 match version_found {
                     None => {
-                        bail!("Storage is used but un-versioned, probably created by an ancient version of Cozo or Retia.")
+                        bail!("Storage is used but un-versioned, probably created by an ancient version of Cozo or Retia.");
                     }
                     Some(v) => {
                         if v != CURRENT_STORAGE_VERSION {
@@ -119,7 +119,7 @@ impl<'a> SessionTx<'a> {
                                 "Version mismatch: expect storage version {:?}, got {:?}",
                                 CURRENT_STORAGE_VERSION,
                                 v
-                            )
+                            );
                         }
                     }
                 }

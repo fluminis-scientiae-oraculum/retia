@@ -98,7 +98,7 @@ impl Symbol {
             #[diagnostic(code(parser::symbol_invalid_as_field))]
             struct SymbolInvalidAsField(String, #[label] SourceSpan);
 
-            bail!(SymbolInvalidAsField(self.name.to_string(), self.span))
+            bail!(SymbolInvalidAsField(self.name.to_string(), self.span));
         }
         Ok(())
     }

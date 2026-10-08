@@ -469,7 +469,7 @@ fn parse_quoted_string(pair: Pair<'_>) -> Result<SmartString<LazyCompact>> {
                 ret.push(ch);
             }
             s if s.starts_with('\\') => {
-                bail!(InvalidEscapeSeqError(s.to_string(), pair.extract_span()))
+                bail!(InvalidEscapeSeqError(s.to_string(), pair.extract_span()));
             }
             s => ret.push_str(s),
         }
@@ -498,7 +498,7 @@ fn parse_s_quoted_string(pair: Pair<'_>) -> Result<SmartString<LazyCompact>> {
                 ret.push(ch);
             }
             s if s.starts_with('\\') => {
-                bail!(InvalidEscapeSeqError(s.to_string(), pair.extract_span()))
+                bail!(InvalidEscapeSeqError(s.to_string(), pair.extract_span()));
             }
             s => ret.push_str(s),
         }

@@ -97,7 +97,7 @@ impl<'s> StoreTx<'s> for MemTx<'s> {
     fn put(&mut self, key: &[u8], val: &[u8]) -> Result<()> {
         match self {
             MemTx::Reader(_) => {
-                bail!("write in read transaction")
+                bail!("write in read transaction");
             }
             MemTx::Writer(_, cache) => {
                 cache.insert(key.to_vec(), Some(val.to_vec()));
@@ -117,7 +117,7 @@ impl<'s> StoreTx<'s> for MemTx<'s> {
     fn del(&mut self, key: &[u8]) -> Result<()> {
         match self {
             MemTx::Reader(_) => {
-                bail!("write in read transaction")
+                bail!("write in read transaction");
             }
             MemTx::Writer(_, cache) => {
                 cache.insert(key.to_vec(), None);
@@ -129,7 +129,7 @@ impl<'s> StoreTx<'s> for MemTx<'s> {
     fn del_range_from_persisted(&mut self, lower: &[u8], upper: &[u8]) -> Result<()> {
         match self {
             MemTx::Reader(_) => {
-                bail!("write in read transaction")
+                bail!("write in read transaction");
             }
             MemTx::Writer(ref mut wtr, _) => {
                 let keys = wtr

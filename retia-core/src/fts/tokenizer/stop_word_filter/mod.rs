@@ -90,7 +90,7 @@ impl StopWordFilter {
             "vi" => stopwords::VI,
             "yo" => stopwords::YO,
             "zu" => stopwords::ZU,
-            _ => bail!("Unsupported language: {}", language),
+            _ => { bail!("Unsupported language: {}", language); },
         };
 
         Ok(Self::new(words.iter().map(|&word| word.to_owned())))

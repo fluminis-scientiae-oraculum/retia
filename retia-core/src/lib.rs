@@ -148,10 +148,10 @@ impl DbInstance {
             "rocksdb" => Self::RocksDb(new_retia_rocksdb(path)?),
             #[cfg(feature = "storage-new-rocksdb")]
             "newrocksdb" => Self::NewRocksDb(new_retia_newrocksdb(path)?),
-            k => bail!(
+            k => { bail!(
                 "database engine '{}' not supported (maybe not compiled in)",
                 k
-            ),
+            ); },
         })
     }
     /// Same as [Self::new], but inputs and error messages are all in strings
@@ -538,7 +538,7 @@ impl MultiTransaction {
         }
         match self.receiver.recv() {
             Ok(r) => r,
-            Err(err) => bail!(err),
+            Err(err) => { bail!(err); },
         }
     }
     /// Commits the multi-transaction
@@ -548,7 +548,7 @@ impl MultiTransaction {
         }
         match self.receiver.recv() {
             Ok(_) => Ok(()),
-            Err(err) => bail!(err),
+            Err(err) => { bail!(err); },
         }
     }
     /// Aborts the multi-transaction
@@ -558,7 +558,7 @@ impl MultiTransaction {
         }
         match self.receiver.recv() {
             Ok(_) => Ok(()),
-            Err(err) => bail!(err),
+            Err(err) => { bail!(err); },
         }
     }
 }

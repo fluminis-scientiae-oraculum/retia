@@ -62,7 +62,7 @@ impl<'a> SessionTx<'a> {
                 #[error("replace op in trigger is not allowed: {0}")]
                 #[diagnostic(code(eval::replace_in_trigger))]
                 struct ReplaceInTrigger(String);
-                bail!(ReplaceInTrigger(meta.name.to_string()))
+                bail!(ReplaceInTrigger(meta.name.to_string()));
             }
             if let Ok(old_handle) = self.get_relation(&meta.name, true) {
                 if !old_handle.indices.is_empty() {
@@ -70,7 +70,7 @@ impl<'a> SessionTx<'a> {
                     #[error("cannot replace relation {0} since it has indices")]
                     #[diagnostic(code(eval::replace_rel_with_indices))]
                     struct ReplaceRelationWithIndices(String);
-                    bail!(ReplaceRelationWithIndices(old_handle.name.to_string()))
+                    bail!(ReplaceRelationWithIndices(old_handle.name.to_string()));
                 }
                 if old_handle.access_level < AccessLevel::Normal {
                     bail!(InsufficientAccessLevel(
@@ -592,7 +592,7 @@ impl<'a> SessionTx<'a> {
                         relation: relation_store.name.to_string(),
                         key: new_kv,
                         notice: "key to update does not exist".to_string()
-                    })
+                    });
                 }
                 Some(v) => rmp_serde::from_slice(&v[ENCODED_KEY_MIN_LEN..]).unwrap(),
             };
@@ -836,7 +836,7 @@ impl<'a> SessionTx<'a> {
                     relation: relation_store.name.to_string(),
                     key: extracted,
                     notice: "key exists in database".to_string()
-                })
+                });
             }
         }
         Ok(())
@@ -895,7 +895,7 @@ impl<'a> SessionTx<'a> {
                         relation: relation_store.name.to_string(),
                         key: extracted,
                         notice: "key does not exist in database".to_string()
-                    })
+                    });
                 }
                 Some(v) => {
                     if &v as &[u8] != &val as &[u8] {
@@ -903,7 +903,7 @@ impl<'a> SessionTx<'a> {
                             relation: relation_store.name.to_string(),
                             key: extracted,
                             notice: "key exists in database, but value does not match".to_string()
-                        })
+                        });
                     }
                 }
             }

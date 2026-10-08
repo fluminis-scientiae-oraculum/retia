@@ -1037,12 +1037,12 @@ impl FtsSearchRA {
                                     }
                                     coll.write_str(&s).unwrap();
                                 }
-                                d => bail!("Expected string for FTS search, got {:?}", d),
+                                d => { bail!("Expected string for FTS search, got {:?}", d); },
                             }
                         }
                         coll
                     }
-                    d => bail!("Expected string for FTS search, got {:?}", d),
+                    d => { bail!("Expected string for FTS search, got {:?}", d); },
                 };
 
                 let res = tx.fts_search(
@@ -1105,7 +1105,7 @@ impl HnswSearchRA {
             .map_ok(move |tuple| -> Result<_> {
                 let v = match tuple[bind_idx].clone() {
                     DataValue::Vec(v) => v,
-                    d => bail!("Expected vector, got {:?}", d),
+                    d => { bail!("Expected vector, got {:?}", d); },
                 };
 
                 let res = tx.hnsw_knn(v, &config, &filter_code, &mut stack)?;
@@ -2257,16 +2257,12 @@ impl InnerJoin {
         let cached_data = {
             let mut cache = BTreeSet::new();
             for item in self.right.iter(tx, delta_rule, stores)? {
-                match item {
-                    Ok(tuple) => {
-                        let stored_tuple = right_store_indices
-                            .iter()
-                            .map(|i| tuple[*i].clone())
-                            .collect_vec();
-                        cache.insert(stored_tuple);
-                    }
-                    Err(e) => return Err(e),
-                }
+                let tuple = item?;
+                let stored_tuple = right_store_indices
+                    .iter()
+                    .map(|i| tuple[*i].clone())
+                    .collect_vec();
+                cache.insert(stored_tuple);
             }
             cache.into_iter().collect_vec()
         };
