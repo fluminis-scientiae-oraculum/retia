@@ -61,13 +61,13 @@ miette = { version = "7", features = ["fancy"] }
 ctrlc = "3.4.4"
 axum = "0.8"
 axum-macros = "0.5"
-itertools = "0.14"
+itertools = "0.15"
 tokio = { version = "1.37.0", features = ["full"] }
 async-stream = "0.3.5"
 futures = "0.3.30"
 crossbeam = "0.8.4"
-eventsource-client = "0.17"
-tower-http = { version = "0.6", features = ["full"] }
+eventsource-client = "0.18"
+tower-http = { version = "0.7", features = ["full"] }
 rayon = { version = "1", optional = true }
 
 [lints]
