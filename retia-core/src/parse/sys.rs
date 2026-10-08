@@ -314,7 +314,9 @@ pub(crate) fn parse_sys(
                                         tokenizer.name = var.name;
                                         tokenizer.args = vec![];
                                     }
-                                    _ => { bail!("Tokenizer must be a symbol or a call for an existing tokenizer"); },
+                                    _ => {
+                                        bail!("Tokenizer must be a symbol or a call for an existing tokenizer");
+                                    }
                                 }
                             }
                             "filters" => {
@@ -344,14 +346,20 @@ pub(crate) fn parse_sys(
                                                         args: vec![],
                                                     })
                                                 }
-                                                _ => { bail!("Tokenizer must be a symbol or a call for an existing tokenizer"); },
+                                                _ => {
+                                                    bail!("Tokenizer must be a symbol or a call for an existing tokenizer");
+                                                }
                                             }
                                         }
                                     }
-                                    _ => { bail!("Filters must be a list of filters"); },
+                                    _ => {
+                                        bail!("Filters must be a list of filters");
+                                    }
                                 }
                             }
-                            _ => { bail!("Unknown option {} for LSH index", opt_name.as_str()); },
+                            _ => {
+                                bail!("Unknown option {} for LSH index", opt_name.as_str());
+                            }
                         }
                     }
                     ensure!(
@@ -448,7 +456,9 @@ pub(crate) fn parse_sys(
                                         tokenizer.name = var.name;
                                         tokenizer.args = vec![];
                                     }
-                                    _ => { bail!("Tokenizer must be a symbol or a call for an existing tokenizer"); },
+                                    _ => {
+                                        bail!("Tokenizer must be a symbol or a call for an existing tokenizer");
+                                    }
                                 }
                             }
                             "filters" => {
@@ -478,14 +488,20 @@ pub(crate) fn parse_sys(
                                                         args: vec![],
                                                     })
                                                 }
-                                                _ => { bail!("Tokenizer must be a symbol or a call for an existing tokenizer"); },
+                                                _ => {
+                                                    bail!("Tokenizer must be a symbol or a call for an existing tokenizer");
+                                                }
                                             }
                                         }
                                     }
-                                    _ => { bail!("Filters must be a list of filters"); },
+                                    _ => {
+                                        bail!("Filters must be a list of filters");
+                                    }
                                 }
                             }
-                            _ => { bail!("Unknown option {} for FTS index", opt_name.as_str()); },
+                            _ => {
+                                bail!("Unknown option {} for FTS index", opt_name.as_str());
+                            }
                         }
                     }
                     if !extract_filter.is_empty() {

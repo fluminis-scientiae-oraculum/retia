@@ -295,7 +295,9 @@ impl<'s> SqliteTx<'s> {
             // Casting away the lifetime!
             // This is OK because we are abiding by the contract of the underlying C pointer,
             // as required by Sqlite's implementation
-            let prepared = unsafe { std::mem::transmute::<sqlite::Statement<'_>, sqlite::Statement<'static>>(prepared) };
+            let prepared = unsafe {
+                std::mem::transmute::<sqlite::Statement<'_>, sqlite::Statement<'static>>(prepared)
+            };
 
             *stmt = Some(prepared)
         }
@@ -451,12 +453,16 @@ impl<'s> StoreTx<'s> for SqliteTx<'s> {
         statement.bind((1, lower)).unwrap();
         statement.bind((2, upper)).unwrap();
         match statement.next() {
-            Ok(State::Done) => { bail!("range count query returned no rows"); },
+            Ok(State::Done) => {
+                bail!("range count query returned no rows");
+            }
             Ok(State::Row) => {
                 let k = statement.read::<i64, _>(0).unwrap();
                 Ok(k as usize)
             }
-            Err(err) => { bail!(err); },
+            Err(err) => {
+                bail!(err);
+            }
         }
     }
 
@@ -583,7 +589,10 @@ mod tests {
 
         let int_pragma = |name: &str| -> i64 {
             let mut s = conn.prepare(format!("PRAGMA {name};")).unwrap();
-            assert!(matches!(s.next().unwrap(), State::Row), "{name} returned no row");
+            assert!(
+                matches!(s.next().unwrap(), State::Row),
+                "{name} returned no row"
+            );
             s.read::<i64, _>(0).unwrap()
         };
 
@@ -596,7 +605,10 @@ mod tests {
         assert_eq!(int_pragma("synchronous"), 1); // NORMAL
         assert_eq!(int_pragma("cache_size"), -262_144);
         assert_eq!(int_pragma("mmap_size"), 256 * 1024 * 1024);
-        assert_eq!(int_pragma("busy_timeout"), i64::from(SQLITE_BUSY_TIMEOUT_MS));
+        assert_eq!(
+            int_pragma("busy_timeout"),
+            i64::from(SQLITE_BUSY_TIMEOUT_MS)
+        );
     }
 
     // The `flash` profile (Linux-only) must apply WAL + the SSD pragma set, leaving
@@ -611,7 +623,10 @@ mod tests {
 
         let int_pragma = |name: &str| -> i64 {
             let mut s = conn.prepare(format!("PRAGMA {name};")).unwrap();
-            assert!(matches!(s.next().unwrap(), State::Row), "{name} returned no row");
+            assert!(
+                matches!(s.next().unwrap(), State::Row),
+                "{name} returned no row"
+            );
             s.read::<i64, _>(0).unwrap()
         };
 
@@ -623,6 +638,9 @@ mod tests {
         assert_eq!(int_pragma("synchronous"), 1); // NORMAL
         assert_eq!(int_pragma("cache_size"), -131_072);
         assert_eq!(int_pragma("mmap_size"), 256 * 1024 * 1024);
-        assert_eq!(int_pragma("busy_timeout"), i64::from(SQLITE_BUSY_TIMEOUT_MS));
+        assert_eq!(
+            int_pragma("busy_timeout"),
+            i64::from(SQLITE_BUSY_TIMEOUT_MS)
+        );
     }
 }

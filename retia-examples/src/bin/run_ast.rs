@@ -6,7 +6,7 @@ use retia::{
         program::{InputAtom, InputInlineRule, InputInlineRulesOrFixed, InputProgram, Unification},
         symb::PROG_ENTRY,
     },
-    parse::{RetiaScript, ImperativeStmt, ImperativeStmtClause},
+    parse::{ImperativeStmt, ImperativeStmtClause, RetiaScript},
     DataValue, DbInstance, Num, ScriptMutability, Symbol,
 };
 

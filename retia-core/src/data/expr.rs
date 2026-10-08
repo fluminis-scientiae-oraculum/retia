@@ -78,7 +78,9 @@ pub fn eval_bytecode_pred(
 ) -> Result<bool> {
     match eval_bytecode(bytecodes, bindings, stack)? {
         DataValue::Bool(b) => Ok(b),
-        v => { bail!(PredicateTypeError(span, v)); },
+        v => {
+            bail!(PredicateTypeError(span, v));
+        }
     }
 }
 
@@ -406,7 +408,9 @@ impl Expr {
         self.partial_eval()?;
         match self {
             Expr::Const { val, .. } => Ok(val),
-            _ => { bail!(NotConstError); },
+            _ => {
+                bail!(NotConstError);
+            }
         }
     }
     pub(crate) fn partial_eval(&mut self) -> Result<()> {

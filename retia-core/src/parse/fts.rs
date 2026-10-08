@@ -8,7 +8,7 @@
 
 use crate::fts::ast::{FtsExpr, FtsLiteral, FtsNear};
 use crate::parse::expr::parse_string;
-use crate::parse::{RetiaScriptParser, Pair, Rule};
+use crate::parse::{Pair, RetiaScriptParser, Rule};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use miette::{IntoDiagnostic, Result};

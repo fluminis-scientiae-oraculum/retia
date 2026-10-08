@@ -81,11 +81,17 @@ fn test_uuid_v7_memcmp_matches_in_memory_order() {
 
     let mut sorted_by_memory = uuids.clone();
     sorted_by_memory.sort();
-    assert_eq!(uuids, sorted_by_memory, "v7 must sort chronologically in memory");
+    assert_eq!(
+        uuids, sorted_by_memory,
+        "v7 must sort chronologically in memory"
+    );
 
     let mut sorted_by_memcmp = encoded.clone();
     sorted_by_memcmp.sort();
-    assert_eq!(encoded, sorted_by_memcmp, "v7 must sort chronologically by memcmp bytes");
+    assert_eq!(
+        encoded, sorted_by_memcmp,
+        "v7 must sort chronologically by memcmp bytes"
+    );
 
     // And the two orderings must agree.
     encoded.sort();

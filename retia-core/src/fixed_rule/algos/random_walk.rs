@@ -93,12 +93,14 @@ impl FixedRule for RandomWalk {
                                         );
                                         f
                                     }
-                                    v => { bail!(BadExprValueError(
-                                        v,
-                                        *span,
-                                        "'weight' must evaluate to a non-negative number"
-                                            .to_string()
-                                    )); },
+                                    v => {
+                                        bail!(BadExprValueError(
+                                            v,
+                                            *span,
+                                            "'weight' must evaluate to a non-negative number"
+                                                .to_string()
+                                        ));
+                                    }
                                 })
                             })
                             .try_collect()?;

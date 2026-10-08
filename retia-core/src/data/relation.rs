@@ -232,7 +232,9 @@ impl NullableColType {
                         .map_err(|e| BadBase64EncodedString(e.to_string()))?;
                     DataValue::Bytes(b)
                 }
-                _ => { bail!(make_err()); },
+                _ => {
+                    bail!(make_err());
+                }
             },
             ColType::Uuid => DataValue::Uuid(UuidWrapper(data.get_uuid().ok_or_else(make_err)?)),
             ColType::List { eltype, len } => {
@@ -315,7 +317,9 @@ impl NullableColType {
                         }
                     }
                 }
-                _ => { bail!(make_err()); },
+                _ => {
+                    bail!(make_err());
+                }
             },
             ColType::Tuple(typ) => {
                 if let DataValue::List(l) = data {
@@ -384,7 +388,9 @@ impl NullableColType {
                         }
                         bail!(InvalidValidity(DataValue::List(l)));
                     }
-                    v => { bail!(InvalidValidity(v)); },
+                    v => {
+                        bail!(InvalidValidity(v));
+                    }
                 }
             }
             ColType::Json => DataValue::Json(JsonData(match data {

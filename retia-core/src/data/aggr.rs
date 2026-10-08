@@ -81,7 +81,9 @@ impl NormalAggrObj for AggrAnd {
     fn set(&mut self, value: &DataValue) -> Result<()> {
         match value {
             DataValue::Bool(v) => self.accum &= *v,
-            v => { bail!("cannot compute 'and' for {:?}", v); },
+            v => {
+                bail!("cannot compute 'and' for {:?}", v);
+            }
         }
         Ok(())
     }
@@ -105,7 +107,9 @@ impl MeetAggrObj for MeetAggrAnd {
                 *l &= *r;
                 Ok(old == *l)
             }
-            (u, v) => { bail!("cannot compute 'and' for {:?} and {:?}", u, v); },
+            (u, v) => {
+                bail!("cannot compute 'and' for {:?} and {:?}", u, v);
+            }
         }
     }
 }
@@ -121,7 +125,9 @@ impl NormalAggrObj for AggrOr {
     fn set(&mut self, value: &DataValue) -> Result<()> {
         match value {
             DataValue::Bool(v) => self.accum |= *v,
-            v => { bail!("cannot compute 'or' for {:?}", v); },
+            v => {
+                bail!("cannot compute 'or' for {:?}", v);
+            }
         }
         Ok(())
     }
@@ -145,7 +151,9 @@ impl MeetAggrObj for MeetAggrOr {
                 *l |= *r;
                 Ok(old == *l)
             }
-            (u, v) => { bail!("cannot compute 'or' for {:?} and {:?}", u, v); },
+            (u, v) => {
+                bail!("cannot compute 'or' for {:?} and {:?}", u, v);
+            }
         }
     }
 }
@@ -225,7 +233,9 @@ impl NormalAggrObj for AggrUnion {
     fn set(&mut self, value: &DataValue) -> Result<()> {
         match value {
             DataValue::List(v) => self.accum.extend(v.iter().cloned()),
-            v => { bail!("cannot compute 'union' for value {:?}", v); },
+            v => {
+                bail!("cannot compute 'union' for value {:?}", v);
+            }
         }
         Ok(())
     }
@@ -264,7 +274,9 @@ impl MeetAggrObj for MeetAggrUnion {
                     }
                     inserted
                 }
-                (_, v) => { bail!("cannot compute 'union' for value {:?}", v); },
+                (_, v) => {
+                    bail!("cannot compute 'union' for value {:?}", v);
+                }
             });
         }
     }
@@ -291,7 +303,9 @@ impl NormalAggrObj for AggrIntersection {
                     self.accum = Some(v.iter().cloned().collect())
                 }
             }
-            v => { bail!("cannot compute 'intersection' for value {:?}", v); },
+            v => {
+                bail!("cannot compute 'intersection' for value {:?}", v);
+            }
         }
         Ok(())
     }
@@ -346,7 +360,9 @@ impl MeetAggrObj for MeetAggrIntersection {
                         true
                     }
                 }
-                (_, v) => { bail!("cannot compute 'union' for value {:?}", v); },
+                (_, v) => {
+                    bail!("cannot compute 'union' for value {:?}", v);
+                }
             });
         }
     }
@@ -453,7 +469,9 @@ impl NormalAggrObj for AggrVariance {
                 self.sum_sq += f * f;
                 self.count += 1;
             }
-            v => { bail!("cannot compute 'variance': encountered value {:?}", v); },
+            v => {
+                bail!("cannot compute 'variance': encountered value {:?}", v);
+            }
         }
         Ok(())
     }
@@ -484,7 +502,9 @@ impl NormalAggrObj for AggrStdDev {
                 self.sum_sq += f * f;
                 self.count += 1;
             }
-            v => { bail!("cannot compute 'std_dev': encountered value {:?}", v); },
+            v => {
+                bail!("cannot compute 'std_dev': encountered value {:?}", v);
+            }
         }
         Ok(())
     }
@@ -511,7 +531,9 @@ impl NormalAggrObj for AggrMean {
                 self.sum += n.get_float();
                 self.count += 1;
             }
-            v => { bail!("cannot compute 'mean': encountered value {:?}", v); },
+            v => {
+                bail!("cannot compute 'mean': encountered value {:?}", v);
+            }
         }
         Ok(())
     }
@@ -534,7 +556,9 @@ impl NormalAggrObj for AggrSum {
             DataValue::Num(n) => {
                 self.sum += n.get_float();
             }
-            v => { bail!("cannot compute 'sum': encountered value {:?}", v); },
+            v => {
+                bail!("cannot compute 'sum': encountered value {:?}", v);
+            }
         }
         Ok(())
     }
@@ -562,7 +586,9 @@ impl NormalAggrObj for AggrProduct {
             DataValue::Num(n) => {
                 self.product *= n.get_float();
             }
-            v => { bail!("cannot compute 'product': encountered value {:?}", v); },
+            v => {
+                bail!("cannot compute 'product': encountered value {:?}", v);
+            }
         }
         Ok(())
     }
@@ -747,7 +773,9 @@ impl NormalAggrObj for AggrLatestBy {
                 }
                 Ok(())
             }
-            v => { bail!("cannot compute 'latest_by' on {:?}", v); },
+            v => {
+                bail!("cannot compute 'latest_by' on {:?}", v);
+            }
         }
     }
 
@@ -787,7 +815,9 @@ impl NormalAggrObj for AggrSmallestBy {
                 }
                 Ok(())
             }
-            v => { bail!("cannot compute 'smallest_by' on {:?}", v); },
+            v => {
+                bail!("cannot compute 'smallest_by' on {:?}", v);
+            }
         }
     }
 
@@ -830,7 +860,9 @@ impl NormalAggrObj for AggrMinCost {
                 }
                 Ok(())
             }
-            v => { bail!("cannot compute 'min_cost' on {:?}", v); },
+            v => {
+                bail!("cannot compute 'min_cost' on {:?}", v);
+            }
         }
     }
 
@@ -874,7 +906,9 @@ impl MeetAggrObj for MeetAggrMinCost {
                     true
                 }
             }
-            (u, v) => { bail!("cannot compute 'min_cost' on {:?}, {:?}", u, v); },
+            (u, v) => {
+                bail!("cannot compute 'min_cost' on {:?}, {:?}", u, v);
+            }
         })
     }
 }
@@ -900,7 +934,9 @@ impl NormalAggrObj for AggrShortest {
                 }
                 Ok(())
             }
-            v => { bail!("cannot compute 'shortest' on {:?}", v); },
+            v => {
+                bail!("cannot compute 'shortest' on {:?}", v);
+            }
         }
     }
 
@@ -933,7 +969,9 @@ impl MeetAggrObj for MeetAggrShortest {
             } else {
                 false
             }),
-            (l, v) => { bail!("cannot compute 'shortest' on {:?} and {:?}", l, v); },
+            (l, v) => {
+                bail!("cannot compute 'shortest' on {:?} and {:?}", l, v);
+            }
         }
     }
 }
@@ -1008,7 +1046,9 @@ impl NormalAggrObj for AggrBitAnd {
                 }
                 Ok(())
             }
-            v => { bail!("cannot apply 'bit_and' to {:?}", v); },
+            v => {
+                bail!("cannot apply 'bit_and' to {:?}", v);
+            }
         }
     }
 
@@ -1046,7 +1086,9 @@ impl MeetAggrObj for MeetAggrBitAnd {
 
                 Ok(true)
             }
-            v => { bail!("cannot apply 'bit_and' to {:?}", v); },
+            v => {
+                bail!("cannot apply 'bit_and' to {:?}", v);
+            }
         }
     }
 }
@@ -1077,7 +1119,9 @@ impl NormalAggrObj for AggrBitOr {
                 }
                 Ok(())
             }
-            v => { bail!("cannot apply 'bit_or' to {:?}", v); },
+            v => {
+                bail!("cannot apply 'bit_or' to {:?}", v);
+            }
         }
     }
 
@@ -1115,7 +1159,9 @@ impl MeetAggrObj for MeetAggrBitOr {
 
                 Ok(true)
             }
-            v => { bail!("cannot apply 'bit_or' to {:?}", v); },
+            v => {
+                bail!("cannot apply 'bit_or' to {:?}", v);
+            }
         }
     }
 }
@@ -1146,7 +1192,9 @@ impl NormalAggrObj for AggrBitXor {
                 }
                 Ok(())
             }
-            v => { bail!("cannot apply 'bit_xor' to {:?}", v); },
+            v => {
+                bail!("cannot apply 'bit_xor' to {:?}", v);
+            }
         }
     }
 

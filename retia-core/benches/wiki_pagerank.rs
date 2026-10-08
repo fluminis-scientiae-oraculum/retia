@@ -22,7 +22,7 @@ use test::Bencher;
 
 use lazy_static::{initialize, lazy_static};
 
-use retia::{DbInstance, NamedRows, DataValue};
+use retia::{DataValue, DbInstance, NamedRows};
 
 lazy_static! {
     static ref TEST_DB: DbInstance = {

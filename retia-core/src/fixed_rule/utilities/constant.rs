@@ -86,12 +86,14 @@ impl FixedRule for Constant {
             })?;
         let data = match data.clone().eval_to_const()? {
             DataValue::List(l) => l,
-            _ => { bail!(WrongFixedRuleOptionError {
-                name: "data".to_string(),
-                span: Default::default(),
-                rule_name: "Constant".to_string(),
-                help: "a list of lists is required".to_string(),
-            }); },
+            _ => {
+                bail!(WrongFixedRuleOptionError {
+                    name: "data".to_string(),
+                    span: Default::default(),
+                    rule_name: "Constant".to_string(),
+                    help: "a list of lists is required".to_string(),
+                });
+            }
         };
 
         let mut tuples = vec![];

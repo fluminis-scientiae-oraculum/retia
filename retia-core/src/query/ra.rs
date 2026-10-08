@@ -1037,12 +1037,16 @@ impl FtsSearchRA {
                                     }
                                     coll.write_str(&s).unwrap();
                                 }
-                                d => { bail!("Expected string for FTS search, got {:?}", d); },
+                                d => {
+                                    bail!("Expected string for FTS search, got {:?}", d);
+                                }
                             }
                         }
                         coll
                     }
-                    d => { bail!("Expected string for FTS search, got {:?}", d); },
+                    d => {
+                        bail!("Expected string for FTS search, got {:?}", d);
+                    }
                 };
 
                 let res = tx.fts_search(
@@ -1105,7 +1109,9 @@ impl HnswSearchRA {
             .map_ok(move |tuple| -> Result<_> {
                 let v = match tuple[bind_idx].clone() {
                     DataValue::Vec(v) => v,
-                    d => { bail!("Expected vector, got {:?}", d); },
+                    d => {
+                        bail!("Expected vector, got {:?}", d);
+                    }
                 };
 
                 let res = tx.hnsw_knn(v, &config, &filter_code, &mut stack)?;
@@ -1178,7 +1184,8 @@ impl StoredWithValidityRA {
                     .collect_vec();
 
                 if !skip_range_check && !self.filters.is_empty() {
-                    let other_bindings = &self.bindings[right_join_indices.len()..self.storage.metadata.keys.len()];
+                    let other_bindings =
+                        &self.bindings[right_join_indices.len()..self.storage.metadata.keys.len()];
                     let (l_bound, u_bound) = match compute_bounds(&self.filters, other_bindings) {
                         Ok(b) => b,
                         _ => (vec![], vec![]),
@@ -1341,7 +1348,8 @@ impl StoredRA {
                 let mut stack = vec![];
 
                 if !skip_range_check && !self.filters.is_empty() {
-                    let other_bindings = &self.bindings[right_join_indices.len()..self.storage.metadata.keys.len()];
+                    let other_bindings =
+                        &self.bindings[right_join_indices.len()..self.storage.metadata.keys.len()];
                     let (l_bound, u_bound) = match compute_bounds(&self.filters, other_bindings) {
                         Ok(b) => b,
                         _ => (vec![], vec![]),

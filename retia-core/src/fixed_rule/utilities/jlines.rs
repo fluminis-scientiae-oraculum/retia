@@ -59,7 +59,9 @@ impl FixedRule for JsonReader {
                     _ => Err(BadFields(fields_span)),
                 })
                 .try_collect()?,
-            _ => { bail!(BadFields(fields_span)); },
+            _ => {
+                bail!(BadFields(fields_span));
+            }
         };
         let mut counter = -1i64;
         let mut process_row = |row: &BTreeMap<String, JsonValue>| -> Result<()> {
@@ -151,11 +153,13 @@ impl FixedRule for JsonReader {
                 val: DataValue::Bool(false),
                 ..
             }) => 0,
-            _ => { bail!(CannotDetermineArity(
-                "JsonReader".to_string(),
-                "invalid option 'prepend_index' given, expect a boolean".to_string(),
-                span
-            )); },
+            _ => {
+                bail!(CannotDetermineArity(
+                    "JsonReader".to_string(),
+                    "invalid option 'prepend_index' given, expect a boolean".to_string(),
+                    span
+                ));
+            }
         };
         let fields = opts.get("fields").ok_or_else(|| {
             CannotDetermineArity(
@@ -166,11 +170,13 @@ impl FixedRule for JsonReader {
         })?;
         Ok(match fields.clone().eval_to_const()? {
             DataValue::List(l) => l.len() + with_row_num,
-            _ => { bail!(CannotDetermineArity(
-                "JsonReader".to_string(),
-                "invalid option 'fields' given, expect a list".to_string(),
-                span
-            )); },
+            _ => {
+                bail!(CannotDetermineArity(
+                    "JsonReader".to_string(),
+                    "invalid option 'fields' given, expect a list".to_string(),
+                    span
+                ));
+            }
         })
     }
 }

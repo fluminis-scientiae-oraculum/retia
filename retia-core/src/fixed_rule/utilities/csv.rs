@@ -138,7 +138,9 @@ impl FixedRule for CsvReader {
                                     Some(i) => out_tuple.push(DataValue::from(i)),
                                 };
                             }
-                            _ => { bail!("cannot convert {} to type {}", s, typ); },
+                            _ => {
+                                bail!("cannot convert {} to type {}", s, typ);
+                            }
                         }
                     }
                 }
@@ -189,11 +191,13 @@ impl FixedRule for CsvReader {
                 val: DataValue::Bool(false),
                 ..
             }) => 0,
-            _ => { bail!(CannotDetermineArity(
-                "CsvReader".to_string(),
-                "invalid option 'prepend_index' given, expect a boolean".to_string(),
-                span
-            )); },
+            _ => {
+                bail!(CannotDetermineArity(
+                    "CsvReader".to_string(),
+                    "invalid option 'prepend_index' given, expect a boolean".to_string(),
+                    span
+                ));
+            }
         };
         let columns = options
             .get("types")

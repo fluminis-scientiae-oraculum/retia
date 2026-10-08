@@ -61,10 +61,10 @@ pub use runtime::db::NamedRows;
 pub use runtime::relation::decode_tuple_from_kv;
 pub use runtime::temp_store::RegularTempStore;
 pub use storage::mem::{new_retia_mem, MemStorage};
-#[cfg(feature = "storage-rocksdb")]
-pub use storage::rocks::{new_retia_rocksdb, RocksDbStorage};
 #[cfg(feature = "storage-new-rocksdb")]
 pub use storage::newrocks::{new_retia_newrocksdb, NewRocksDbStorage};
+#[cfg(feature = "storage-rocksdb")]
+pub use storage::rocks::{new_retia_rocksdb, RocksDbStorage};
 #[cfg(feature = "storage-sqlite")]
 pub use storage::sqlite::{new_retia_sqlite, SqliteStorage};
 pub use storage::{Storage, StoreTx};
@@ -148,10 +148,12 @@ impl DbInstance {
             "rocksdb" => Self::RocksDb(new_retia_rocksdb(path)?),
             #[cfg(feature = "storage-new-rocksdb")]
             "newrocksdb" => Self::NewRocksDb(new_retia_newrocksdb(path)?),
-            k => { bail!(
-                "database engine '{}' not supported (maybe not compiled in)",
-                k
-            ); },
+            k => {
+                bail!(
+                    "database engine '{}' not supported (maybe not compiled in)",
+                    k
+                );
+            }
         })
     }
     /// Same as [Self::new], but inputs and error messages are all in strings
@@ -538,7 +540,9 @@ impl MultiTransaction {
         }
         match self.receiver.recv() {
             Ok(r) => r,
-            Err(err) => { bail!(err); },
+            Err(err) => {
+                bail!(err);
+            }
         }
     }
     /// Commits the multi-transaction
@@ -548,7 +552,9 @@ impl MultiTransaction {
         }
         match self.receiver.recv() {
             Ok(_) => Ok(()),
-            Err(err) => { bail!(err); },
+            Err(err) => {
+                bail!(err);
+            }
         }
     }
     /// Aborts the multi-transaction
@@ -558,7 +564,9 @@ impl MultiTransaction {
         }
         match self.receiver.recv() {
             Ok(_) => Ok(()),
-            Err(err) => { bail!(err); },
+            Err(err) => {
+                bail!(err);
+            }
         }
     }
 }

@@ -1291,7 +1291,9 @@ impl SearchInput {
                 match r {
                     "tf_idf" => FtsScoreKind::TfIdf,
                     "tf" => FtsScoreKind::Tf,
-                    s => { bail!("Unknown score kind for FTS: {}", s); },
+                    s => {
+                        bail!("Unknown score kind for FTS: {}", s);
+                    }
                 }
             }
             None => FtsScoreKind::TfIdf,

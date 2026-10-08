@@ -35,7 +35,7 @@ use crate::fixed_rule::utilities::constant::Constant;
 use crate::fixed_rule::{FixedRuleHandle, FixedRuleNotFoundError};
 use crate::parse::expr::build_expr;
 use crate::parse::schema::parse_schema;
-use crate::parse::{RetiaScriptParser, ExtractSpan, Pair, Pairs, Rule, SourceSpan};
+use crate::parse::{ExtractSpan, Pair, Pairs, RetiaScriptParser, Rule, SourceSpan};
 use crate::runtime::relation::InputRelationHandle;
 use crate::FixedRule;
 

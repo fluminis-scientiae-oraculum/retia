@@ -143,11 +143,13 @@ impl FixedRule for ReorderSort {
                 ..
             } => l.len() + 1,
             Expr::Apply { op, args, .. } if **op == OP_LIST => args.len() + 1,
-            _ => { bail!(CannotDetermineArity(
-                "ReorderSort".to_string(),
-                "invalid option 'out' given, expect a list".to_string(),
-                span
-            )); },
+            _ => {
+                bail!(CannotDetermineArity(
+                    "ReorderSort".to_string(),
+                    "invalid option 'out' given, expect a list".to_string(),
+                    span
+                ));
+            }
         })
     }
 }

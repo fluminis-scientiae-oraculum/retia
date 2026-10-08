@@ -134,17 +134,23 @@ impl VectorCache {
                             DataValue::List(l) => {
                                 field = &l[key.2 as usize];
                             }
-                            _ => { bail!("Cannot interpret {} as list", field); },
+                            _ => {
+                                bail!("Cannot interpret {} as list", field);
+                            }
                         }
                     }
                     match field {
                         DataValue::Vec(v) => {
                             self.cache.insert(key.clone(), v.clone());
                         }
-                        _ => { bail!("Cannot interpret {} as vector", field); },
+                        _ => {
+                            bail!("Cannot interpret {} as vector", field);
+                        }
                     }
                 }
-                None => { bail!("Cannot find compound key for HNSW: {:?}", key); },
+                None => {
+                    bail!("Cannot find compound key for HNSW: {:?}", key);
+                }
             }
         }
         Ok(())
@@ -328,9 +334,14 @@ impl<'a> SessionTx<'a> {
                     }
                     let target_self_key_bytes =
                         idx_table.encode_key_for_store(&target_self_key, Default::default())?;
-                    let target_self_val_bytes = match self.store_tx.get(&target_self_key_bytes, false)? {
+                    let target_self_val_bytes = match self
+                        .store_tx
+                        .get(&target_self_key_bytes, false)?
+                    {
                         Some(bytes) => bytes,
-                        None => { bail!("Indexed vector not found, this signifies a bug in the index implementation"); },
+                        None => {
+                            bail!("Indexed vector not found, this signifies a bug in the index implementation");
+                        }
                     };
                     let mut target_self_val: Vec<DataValue> =
                         rmp_serde::from_slice(&target_self_val_bytes[ENCODED_KEY_MIN_LEN..])
@@ -904,8 +915,8 @@ impl<'a> SessionTx<'a> {
                 Some(x) => x as usize,
                 None => {
                     // this occurs if the index is empty
-                    return Ok(vec![])
-                },
+                    return Ok(vec![]);
+                }
             };
             let ep_t_key = ep[1..config.base_handle.metadata.keys.len() + 1].to_vec();
             let ep_subidx = ep[config.base_handle.metadata.keys.len() + 2]
@@ -988,7 +999,9 @@ impl<'a> SessionTx<'a> {
                     } else {
                         match &cand_tuple[cand_key.1] {
                             DataValue::List(v) => v[cand_key.2 as usize].clone(),
-                            v => { bail!("corrupted index value {:?}", v); },
+                            v => {
+                                bail!("corrupted index value {:?}", v);
+                            }
                         }
                     };
                     cand_tuple.push(vec);
