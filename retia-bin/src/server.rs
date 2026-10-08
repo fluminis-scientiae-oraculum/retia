@@ -247,18 +247,18 @@ pub(crate) async fn server_main(args: ServerArgs) {
 
     let app = Router::new()
         .route("/text-query", post(text_query))
-        .route("/export/:relations", get(export_relations))
+        .route("/export/{relations}", get(export_relations))
         .route("/import", put(import_relations))
         .route("/backup", post(backup))
         .route("/import-from-backup", post(import_from_backup))
-        .route("/changes/:relation", get(observe_changes))
-        .route("/rules/:name", get(register_rule))
+        .route("/changes/{relation}", get(observe_changes))
+        .route("/rules/{name}", get(register_rule))
         .route(
-            "/rule-result/:id",
+            "/rule-result/{id}",
             post(post_rule_result).delete(post_rule_err),
         ) // +keep alive
         .route("/transact", post(start_transact))
-        .route("/transact/:id", post(transact_query).put(finish_query))
+        .route("/transact/{id}", post(transact_query).put(finish_query))
         .with_state(state)
         .layer(AsyncRequireAuthorizationLayer::new(auth_obj))
         .fallback(not_found)
